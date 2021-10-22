@@ -5,9 +5,7 @@ import { SearchBarComponentModule } from '../ui/atoms/search-bar/search-bar.comp
 import { SideDrawerComponentModule } from '../ui/atoms/side-drawer/side-drawer.component';
 import { AppShellComponent } from './app-shell.component';
 import { RouterModule } from '@angular/router';
-import { LetModule } from '@rx-angular/template/let';
 import { DarkModeToggleModule } from '../ui/atoms/dark-mode-toggle/dark-mode-toggle.module';
-import { RxForModule } from '../ui/atoms/rx-for/rx-for.module';
 
 @NgModule({
   declarations: [AppShellComponent],
@@ -15,11 +13,9 @@ import { RxForModule } from '../ui/atoms/rx-for/rx-for.module';
     CommonModule,
     RouterModule,
     HamburgerButtonModule,
-    LetModule,
     SideDrawerComponentModule,
     SearchBarComponentModule,
-    DarkModeToggleModule,
-    RxForModule,
+    DarkModeToggleModule
   ],
   exports: [AppShellComponent],
 })

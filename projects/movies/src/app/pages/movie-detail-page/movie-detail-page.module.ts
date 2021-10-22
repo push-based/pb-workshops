@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { LetModule } from '@rx-angular/template/let';
 import { LoaderComponentModule } from '../../ui/atoms/loader/loader.component';
 import { MovieDetailPageComponent } from './movie-detail-page.component';
 import { StarRatingModule } from '../../ui/atoms/star-rating/star-rating.module';
@@ -22,7 +21,6 @@ const ROUTES: Routes = [
     RouterModule.forChild(ROUTES),
     StarRatingModule,
     MovieListModule,
-    LetModule,
     LoaderComponentModule,
     AspectRatioBoxModule,
   ],

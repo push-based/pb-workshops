@@ -1,17 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
-import { RxState } from '@rx-angular/state';
-import { catchError, EMPTY, map, Observable, of, startWith, switchMap } from 'rxjs';
-import { MovieModel } from '../../data-access/model/index';
-import { StateService } from '../../shared/state/state.service';
+import { EMPTY, map, Observable, startWith, switchMap } from 'rxjs';
+import { MovieDataService } from '../../data-access/api/movie-data.service';
+import { MovieModel } from '../../shared/model/index';
 
-
-type MoviesState = {
-  loading: boolean;
-  movies: MovieModel[];
-  title: string;
-};
 
 type RouterParams = {
   type: string;
@@ -27,57 +20,46 @@ type RouterParams = {
         width: 100%;
       }
     `
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
-export class MovieListPageComponent extends RxState<MoviesState> {
+export class MovieListPageComponent implements OnInit {
   movies: MovieModel[] = [];
-
-  readonly movies$ = this.select('movies');
-  readonly loading$ = this.select('loading');
-  readonly title$ = this.select('title');
+  title: string = '';
 
   private routerParams$: Observable<RouterParams> = this.route.params as unknown as Observable<RouterParams>;
 
+
   constructor(
-    private tmdbState: StateService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private movieData: MovieDataService
   ) {
-    super();
 
-    this.connect(this.getListByRouterParams());
-
-    this.hold(this.routerParams$,
-      ({ type, identifier }) => {
-        if (type === 'category') {
-          this.tmdbState.fetchCategoryMovies(identifier);
-        } else if (type === 'genre') {
-          this.tmdbState.fetchGenreMovies(identifier);
-        }
-      }
-    );
   }
 
-  getListByRouterParams = (): Observable<Partial<MoviesState>> => {
-    return this.routerParams$.pipe(
+  ngOnInit() {
+    this.routerParams$.pipe(
       switchMap(({ identifier, type }) => {
         if (type === 'category') {
-          return this.tmdbState.categoryMovieList$(identifier);
+          return this.movieData.getMovieCategory(identifier).pipe(
+            map(response => ({
+              movies: response.results,
+              title: identifier
+            }))
+          );
         } else if (type === 'genre') {
-          return this.tmdbState.genreMovieList$(identifier);
+          return this.movieData.getMovieGenre(identifier).pipe(
+            map(response => ({
+              movies: response.results,
+              title: identifier
+            }))
+          );
         }
         return EMPTY;
       }),
-      map(({ movies, title }) => ({
-        loading: false,
-        movies,
-        title
-      })),
-      catchError((_: any) => {
-        return of({ loading: false, movies: [], title: undefined });
-      }),
-      startWith({ loading: true })
-    );
-  };
-
+    ).subscribe(({ title, movies }) => {
+      console.log(title);
+      this.movies = movies;
+      this.title = title;
+    })
+  }
 }

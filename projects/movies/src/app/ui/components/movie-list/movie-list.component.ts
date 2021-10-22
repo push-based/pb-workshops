@@ -1,9 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { RxState } from '@rx-angular/state';
-import { map, Observable } from 'rxjs';
-import { MovieModel } from '../../../data-access/model/index';
-// @Todo: move const into data-access folder as related to API
+import { MovieModel } from '../../../shared/model/index';
 import { W300H450 } from '../../../shared/utils/image-sizes';
 
 interface Movie extends MovieModel {
@@ -14,37 +11,33 @@ interface Movie extends MovieModel {
   selector: 'app-movie-list',
   template: `
     <ng-content select='.header'></ng-content>
-    <ng-container
-      *rxLet="hasMovies$; let hasMovies; strategy: 'instantUserBlocking'"
-    >
-      <div class='movies-list--grid' *ngIf='hasMovies; else noData'>
-        <a
-          class='movies-list--grid-item'
-          *rxFor='let movie of movies$; trackBy: movieById'
-          (click)='toMovie(movie)'
-        >
-          <div class='movies-list--grid-item-image gradient'>
-            <app-aspect-ratio-box [aspectRatio]='W300H450.WIDTH / W300H450.HEIGHT'>
-              <img
-                loading='lazy'
-                [src]='movie.url'
-                [width]='W300H450.WIDTH'
-                [height]='W300H450.HEIGHT'
-                alt='poster movie'
-                [title]='movie.title'
-              />
-            </app-aspect-ratio-box>
-          </div>
-          <div class='movies-list--grid-item__details'>
-            <h2 class='movies-list--grid-item__details-title'>
-              {{ movie.title }}
-            </h2>
-            <app-star-rating [rating]='movie.vote_average'></app-star-rating>
-          </div>
-        </a>
-        <div class='pagination'></div>
-      </div>
-    </ng-container>
+    <div class='movies-list--grid' *ngIf='hasMovies; else noData'>
+      <a
+        class='movies-list--grid-item'
+        *ngFor='let movie of _movies; trackBy: movieById'
+        (click)='toMovie(movie)'
+      >
+        <div class='movies-list--grid-item-image gradient'>
+          <app-aspect-ratio-box [aspectRatio]='W300H450.WIDTH / W300H450.HEIGHT'>
+            <img
+              loading='lazy'
+              [src]='movie.url'
+              [width]='W300H450.WIDTH'
+              [height]='W300H450.HEIGHT'
+              alt='poster movie'
+              [title]='movie.title'
+            />
+          </app-aspect-ratio-box>
+        </div>
+        <div class='movies-list--grid-item__details'>
+          <h2 class='movies-list--grid-item__details-title'>
+            {{ movie.title }}
+          </h2>
+          <app-star-rating [rating]='movie.vote_average'></app-star-rating>
+        </div>
+      </a>
+      <div class='pagination'></div>
+    </div>
 
     <ng-template #noData>
       <h3>
@@ -61,38 +54,28 @@ interface Movie extends MovieModel {
     </ng-template>
   `,
   styleUrls: ['./movie-list.component.scss'],
-  providers: [RxState],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MovieListComponent {
   W300H450 = W300H450;
 
-  movies$ = this.state.select('movies').pipe(
-    map(
-      (movies) =>
-        (movies || []).map((m) => ({
-          ...m,
-          url: `https://image.tmdb.org/t/p/w${W300H450.WIDTH}/${m.poster_path}`,
-        })) as Movie[]
-    )
-  );
-
-  hasMovies$ = this.state
-    .select('movies')
-    .pipe(map((movies) => !!movies && movies.length > 0));
-
+  _movies: Movie[] = [];
   @Input()
-  set movies(movies$: Observable<MovieModel[]>) {
-    this.state.connect('movies', movies$);
+  set movies(movies: MovieModel[]) {
+    this._movies = movies?.map(m => ({
+      ...m,
+      url: `https://image.tmdb.org/t/p/w${W300H450.WIDTH}/${m.poster_path}`,
+    }));
   }
 
   @Input() adult?: string;
 
+  get hasMovies(): boolean {
+    return this._movies?.length > 0;
+  }
+
   constructor(
-    private router: Router,
-    private state: RxState<{
-      movies: MovieModel[];
-    }>
+    private router: Router
   ) {}
 
   movieById(_: number, movie: Movie) {

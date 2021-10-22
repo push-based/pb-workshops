@@ -1,27 +1,111 @@
 # PbWorkshops
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.11.
+## Exercises
 
-## Development server
+### NX
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+#### init workspace & task-graph
 
-## Code scaffolding
+* migrate to nx: npx nx init-workspace
+* extract shared libraries
+* use affected commands
+* watch dependency graph
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+#### organize code with libs
 
-## Build
+* migrate libs
+* setup module boundaries
+* affected
+* fix boundary errors
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+#### generators (schematics)
 
-## Running unit tests
+* implement custom schematic
+* run custom schematic
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+#### continuous integration
 
-## Running end-to-end tests
+* setup CI
+* test CI
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+### ChangeDetection Basics
 
-## Further help
+**app.component**
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+* if activated, initial navigation will end up with empty movies
+
+**app-shell.component**
+
+* genres => movieService.getGenres
+
+**movie-list-page.component**
+
+* movies, title => bug onInit, CD won't work after OnPush
+
+**movie-list.component**
+
+* TODO: Check what happens when activate/deactivate here
+
+### State Management
+
+#### Local State
+
+**app-shell.component**
+
+* activeRoute$ | async pipe usage (ngFor)
+  * shareReplay()
+  * *ngIf= (o$ | async) as
+* subscribe => genre = result
+
+**move-list.component**
+
+subscription handling:
+ * unsubscribe 
+
+manage list state:
+  * loading, error, refresh 
+    * start: https://stackblitz.com/edit/angular-ivy-xlcrcn
+    * end: https://stackblitz.com/edit/angular-ivy-r84fjs
+  * favorite (update per item)
+  * pagination
+  * filter
+  
+#### Global State
+
+**movie-state**
+
+introduce `MovieDataState` 
+* movies:
+  * loading
+  * error
+  * re-fetch
+  * search
+  * filter
+  * pagination
+* genres:
+  * share
+
+**auth**
+
+* introduce auth state
+* implement login/logout flow, reflect in the UI
+
+**dependency injection**
+* introduce abstraction layer (port-pattern)
+
+### Component Patterns
+
+#### Content Projection
+
+#### structural directives
+* implement `isAuthed` Directive => structural directive
+
+#### svg templates
+* create nav-item-icon.component from svg in app-shell.component
+
+#### lazy components
+* https://stackblitz.com/edit/angular-ivy-aa8cxj
+* https://stackblitz.com/edit/angular-ivy-mz8hsi
+
+#### flattening operators
+https://stackblitz.com/edit/rxjs-flattening-operators-example

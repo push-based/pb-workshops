@@ -6,38 +6,24 @@ import {
   MovieGenreModel,
   MovieModel,
   MoviePersonModel,
-} from '../model/index';
-import { Configuration } from './configuration.interface';
-import { MovieDatabaseModel } from '../model/movie-database.model';
+} from '../../shared/model/index';
+import { MovieDatabaseModel } from '../../shared/model/movie-database.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class Tmdb2Service {
+export class MovieDataService {
   constructor(private http: HttpClient) {}
 
   private apiVersion = environment.tmdbApiVersion;
   private apiNewVersion = environment.tmdbApiNewVersion;
   private baseUrl = [environment.tmdbBaseUrl, this.apiVersion].join('/');
 
-  private URL_REQUEST_TOKEN = [
-    environment.tmdbBaseUrl,
-    this.apiNewVersion,
-    'auth',
-    'request_token',
-  ].join('/');
-  private URL_ACCESS_TOKEN = [
-    environment.tmdbBaseUrl,
-    this.apiNewVersion,
-    'auth',
-    'access_token',
-  ].join('/');
   private URL_LISTS = [
     environment.tmdbBaseUrl,
     this.apiNewVersion,
     'list',
   ].join('/');
-  private URL_CONFIGURATION = [this.baseUrl, 'configuration'].join('/');
   private URL_SEARCH = [this.baseUrl, 'search', 'movie'].join('/');
   private URL_PERSON = [this.baseUrl, 'person'].join('/');
   private URL_GENRE_MOVIE_LIST = [this.baseUrl, 'genre', 'movie', 'list'].join(
@@ -52,23 +38,6 @@ export class Tmdb2Service {
     [this.baseUrl, 'movie', id, 'credits'].join('/')
   private URL_MOVIE_CATEGORY = (category: string) =>
     [this.baseUrl, 'movie', category].join('/')
-
-  createRequestToken(redirectTo: string): Observable<any> {
-    return this.http.post<any>(this.URL_REQUEST_TOKEN, {
-      redirect_to: redirectTo,
-    });
-  }
-
-  createAccessToken = (requestToken: string): Observable<any> =>
-    this.http.post<any>(this.URL_ACCESS_TOKEN, { request_token: requestToken })
-
-  deleteAccessToken = (accessToken: string): Observable<any> =>
-    this.http.delete<any>(this.URL_ACCESS_TOKEN, {
-      body: { access_token: accessToken },
-    })
-
-  getConfig = (): Observable<Configuration> =>
-    this.http.get<Configuration>(this.URL_CONFIGURATION)
 
   getMovie = (id: string): Observable<MovieModel> =>
     this.http.get<MovieModel>(this.URL_MOVIE(id))
@@ -106,7 +75,7 @@ export class Tmdb2Service {
   getPerson = (id: string): Observable<MoviePersonModel> =>
     this.http.get<MoviePersonModel>(this.URL_PERSON, { params: { id } })
 
-  getMovies = (
+  searchMovies = (
     query: string,
     page: string | number,
     lang?: string
