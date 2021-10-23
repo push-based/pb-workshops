@@ -28,7 +28,7 @@
 * setup CI
 * test CI
 
-### ChangeDetection Basics
+### ChangeDetection
 
 **app.component**
 
@@ -57,7 +57,7 @@
   * *ngIf= (o$ | async) as
 * subscribe => genre = result
 
-**move-list.component**
+**move-list-page.component**
 
 subscription handling:
  * unsubscribe 
@@ -67,8 +67,8 @@ manage list state:
     * start: https://stackblitz.com/edit/angular-ivy-xlcrcn
     * end: https://stackblitz.com/edit/angular-ivy-r84fjs
   * favorite (update per item)
-  * pagination
-  * filter
+ 
+pagination & filter:
   
 #### Global State
 
@@ -89,6 +89,7 @@ introduce `MovieDataState`
 
 * introduce auth state
 * implement login/logout flow, reflect in the UI
+* implement auth interceptor
 
 **dependency injection**
 * introduce abstraction layer (port-pattern)
