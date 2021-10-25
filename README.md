@@ -93,6 +93,22 @@ movieById(_: number, movie: Movie) {
 }
 ```
 
+**app-shell.component.ts**
+
+* add `app-dirty-check` to genre-item template
+* run
+* add trackBy to `*ngFor="let genre of genres;"`
+* run again
+
+```ts
+// use util function
+trackGenre = trackByProp<MovieGenreModel>('name');
+// or implement it plain
+trackGenre(index: number, genre: MovieGenreModel) {
+  return genre.name;
+}
+```
+
 ## State Management
 
 ### Local State
@@ -110,12 +126,88 @@ subscription handling:
  * unsubscribe 
 
 manage list state:
-  * loading, error, refresh 
+**loading, error, refresh** 
     * start: https://stackblitz.com/edit/angular-ivy-xlcrcn
     * end: https://stackblitz.com/edit/angular-ivy-r84fjs
-  * favorite (update per item)
+
+**list state & refresh**
+
+
+**per-item update**
+
+extend `star-rating.component.ts`
+
+```html
+ <span class="star" *ngIf="selected">
+        {{ selected }}
+</span>
+<span
+  *ngFor="let fill of stars; let i = index; trackBy: trackByIndex"
+  class="star"
+  (click)="starClicked($event, i + 1)"
+  [ngClass]="{
+    'star-half': fill === 0,
+    'star-empty': fill === -1
+  }"
+  style
+>★</span>
+```
+
+```ts
+
+selected = 0;
+@Output() starSelected = new EventEmitter<number>();
+
+starClicked(event: MouseEvent, star: number): void {
+  // don't mess up with click event for routing
+  event.preventDefault();
+  event.stopPropagation();
+  this.selected = star;
+}
+```
+
+
+pass-through `@Output() starSelected` from `star-rating.component.ts`
+to `movie-list-page.component.ts`.
+
+```ts
+// movie-list.component.ts
+
+// we pass through `starSelected` via `ratingUpdate` to the parent component
+@Output() ratingUpdated = new EventEmitter<number>();
+```
+
+```html
+<!-- movie-list.component.html -->
+
+<app-star-rating
+  (starSelected)="ratingUpdated.next($event)"
+  [rating]='movie.vote_average'></app-star-rating>
+```
+
+```ts
+// movie-list-page.component.ts
+
+// we pass through `starSelected` via `ratingUpdate` to the parent component
+ratingUpdated = new Subject<{ movie, rating }>();
+
+state.connect(
+    ratingUpdate.pipe(
+        mergeMap(e => service.updateMovie(e))
+    )
+)
+
+```
+
+```html
+<!-- movie-list-page.component.html -->
+
+<app-movie-list (ratingUpdate)="ratingUpdated.next($event)"></app-movie-list>
+```
+
+
  
-pagination & filter:
+**pagination & filter:**
   
 ### Global State
 

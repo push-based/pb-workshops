@@ -4,7 +4,6 @@ import {
   Input
 } from '@angular/core';
 import {
-  coerceBooleanProperty,
   coerceNumberProperty,
 } from '@angular/cdk/coercion';
 
@@ -36,19 +35,11 @@ const starsArray: number[] = new Array(numStars).fill(1);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StarRatingComponent {
-  range = range;
-  numStars = numStars;
   stars: number[] = starsArray;
-  private _showRating = false;
-  @Input()
-  set showRating(show: boolean) {
-    this._showRating = coerceBooleanProperty(show);
-  }
-  get showRating(): boolean {
-    return this._showRating;
-  }
   tooltipText = `0 average rating`;
   trackByIndex = (index: number) => index;
+
+  @Input() showRating = false;
 
   private _rating = 5;
   @Input()
@@ -58,10 +49,10 @@ export class StarRatingComponent {
     this.setToolTopText(this.rating);
 
     const scaledRating =
-      coerceNumberProperty(rating, 0) / (this.range / this.numStars);
+      coerceNumberProperty(rating, 0) / (range / numStars);
     const full = Math.floor(scaledRating);
     const half = scaledRating % 1 > 0 ? 1 : 0;
-    const empty = this.numStars - full - half;
+    const empty = numStars - full - half;
     this.stars = new Array(full)
       .fill(1)
       .concat(new Array(half).fill(0))
