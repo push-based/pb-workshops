@@ -1,6 +1,7 @@
 <app-side-drawer
   [opened]="sideDrawerOpen"
   (openedChange)="closeSidenav()"
+  *ngIf="viewModel$ | async as vm"
 >
   <a class="navigation-header" href='/'>
     <picture>
@@ -18,7 +19,7 @@
     <h2 class="navigation--headline">Discover</h2>
     <a
       class="navigation--link"
-      [class.active]="(activeRoute$ | async) === '/list/category/popular'"
+      [class.active]="vm.activeRoute === '/list/category/popular'"
       (click)="navTo('/list', ['category', 'popular'])"
     >
       <div class="navigation--menu-item">
@@ -37,7 +38,7 @@
     </a>
     <a
       class="navigation--link"
-      [class.active]="(activeRoute$ | async) === '/list/category/top_rated'"
+      [class.active]="vm.activeRoute === '/list/category/top_rated'"
       (click)="navTo('/list', ['category', 'top_rated'])"
     >
       <div class="navigation--menu-item">
@@ -56,7 +57,7 @@
     </a>
     <a
       class="navigation--link"
-      [class.active]="(activeRoute$ | async) === '/list/category/upcoming'"
+      [class.active]="vm.activeRoute === '/list/category/upcoming'"
       (click)="navTo('/list', ['category', 'upcoming'])"
     >
       <div class="navigation--menu-item">
@@ -76,10 +77,10 @@
     <h2 class="navigation--headline">Genres</h2>
     <a
       *ngFor="
-          let genre of genres$ | async; trackBy: trackGenre
+          let genre of vm.genres; trackBy: trackGenre
         "
       class="navigation--link"
-      [class.active]="(activeRoute$ | async) === '/list/genre/' + genre.id"
+      [class.active]="vm.activeRoute === '/list/genre/' + genre.id"
       (click)="navTo('/list', ['genre', genre.id])"
     >
       <div class="navigation--menu-item">
