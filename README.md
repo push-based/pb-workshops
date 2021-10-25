@@ -33,7 +33,7 @@ private activeRoute$ = this.router.events.pipe(
 
 private genres$ = this.movieService.getGenres();
 
-constructor() {
+ngOnInit() {
   this.genres$
     .subscribe(genres => {
       this.state$.next({
