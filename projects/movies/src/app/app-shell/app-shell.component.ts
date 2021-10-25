@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { MovieDataService } from '../data-access/api/movie-data.service';
 import { MovieGenreModel } from '../shared/model/index';
+import { trackByProp } from '../shared/utils/track-by';
 
 @Component({
   selector: 'app-shell',
@@ -26,6 +27,8 @@ export class AppShellComponent implements OnInit {
     private movieService: MovieDataService
   ) {
   }
+
+  trackGenre = trackByProp<MovieGenreModel>('name');
 
   ngOnInit() {}
 

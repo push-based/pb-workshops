@@ -2,7 +2,7 @@
 <div class='movies-list--grid' *ngIf='hasMovies; else noData'>
   <a
     class='movies-list--grid-item'
-    *ngFor='let movie of _movies'
+    *ngFor='let movie of _movies; trackBy: trackMovie'
     (click)='toMovie(movie)'
   >
     <div class='movies-list--grid-item-image gradient'>

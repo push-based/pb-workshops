@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MovieModel } from '../../../shared/model/index';
 import { W300H450 } from '../../../shared/utils/image-sizes';
+import { trackByProp } from '../../../shared/utils/track-by';
 
 interface Movie extends MovieModel {
   url: string;
@@ -34,6 +35,8 @@ export class MovieListComponent {
   constructor(
     private router: Router
   ) {}
+
+  trackMovie = trackByProp<Movie>('id');
 
   toMovie(movie: Movie) {
     this.router.navigate(['/movie', movie.id]);
