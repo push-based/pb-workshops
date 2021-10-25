@@ -9,7 +9,7 @@ import { MovieListModule } from '../../ui/components/movie-list/movie-list.modul
 
 const ROUTES: Routes = [
   {
-    path: '',
+    path: 'movie/:id',
     component: MovieDetailPageComponent,
   },
 ];
