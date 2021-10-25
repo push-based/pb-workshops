@@ -6,6 +6,7 @@ import { ROUTING_IMPORTS } from './app.routing';
 import { AppComponent } from './app.component';
 import { AppShellModule } from './app-shell/app-shell.module';
 import { httpInterceptorProviders } from './data-access/interceptors/http-interceptor.providers';
+import { MovieListPageModule } from './pages/movie-list-page/movie-list-page.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -13,6 +14,7 @@ import { httpInterceptorProviders } from './data-access/interceptors/http-interc
     BrowserModule,
     HttpClientModule,
     AppShellModule,
+    MovieListPageModule,
     ROUTING_IMPORTS
   ],
   providers: [

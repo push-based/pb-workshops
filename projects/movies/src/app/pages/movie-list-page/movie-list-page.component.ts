@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, map, Observable, startWith, switchMap } from 'rxjs';
+import { EMPTY, map, Observable, switchMap } from 'rxjs';
 import { MovieDataService } from '../../data-access/api/movie-data.service';
 import { MovieModel } from '../../shared/model/index';
 
 
 type RouterParams = {
   type: string;
-  identifier: string;
+  identifier: 'category' | 'genre';
 };
 
 @Component({
@@ -39,27 +39,21 @@ export class MovieListPageComponent implements OnInit {
   ngOnInit() {
     this.routerParams$.pipe(
       switchMap(({ identifier, type }) => {
-        if (type === 'category') {
-          return this.movieData.getMovieCategory(identifier).pipe(
-            map(response => ({
-              movies: response.results,
-              title: identifier
-            }))
-          );
-        } else if (type === 'genre') {
-          return this.movieData.getMovieGenre(identifier).pipe(
-            map(response => ({
-              movies: response.results,
-              title: identifier
-            }))
-          );
+        switch (type) {
+          case 'category':
+            return this.movieData.getMovieCategory(identifier).pipe(
+              map(response => response.results)
+            );
+          case 'genre':
+            return this.movieData.getMovieGenre(identifier).pipe(
+              map(response => response.results)
+            );
+          default:
+            return EMPTY;
         }
-        return EMPTY;
       }),
-    ).subscribe(({ title, movies }) => {
-      console.log(title);
+    ).subscribe(movies => {
       this.movies = movies;
-      this.title = title;
     })
   }
 }

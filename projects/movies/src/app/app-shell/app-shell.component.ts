@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, TrackByFunction } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { MovieDataService } from '../data-access/api/movie-data.service';
 import { MovieGenreModel } from '../shared/model/index';
-import { trackByProp } from '../shared/utils/track-by';
 
 @Component({
   selector: 'app-shell',
@@ -33,9 +32,6 @@ export class AppShellComponent implements OnInit {
         this.genres = response;
       });
   }
-
-  trackByGenre: TrackByFunction<MovieGenreModel> =
-    trackByProp<MovieGenreModel>('name');
 
   navTo(path: string, args: (string | number)[], queryParams?: Record<string, any>) {
     this.closeSidenav();

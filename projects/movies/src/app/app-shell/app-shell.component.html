@@ -77,7 +77,6 @@
     <a
       *ngFor="
           let genre of genres;
-          trackBy: trackByGenre;
         "
       class="navigation--link"
       [class.active]="(activeRoute$ | async) === '/list/genre/' + genre.id"

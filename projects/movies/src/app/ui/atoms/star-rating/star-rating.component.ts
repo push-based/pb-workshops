@@ -1,14 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
-  TrackByFunction,
+  Input
 } from '@angular/core';
 import {
   coerceBooleanProperty,
   coerceNumberProperty,
 } from '@angular/cdk/coercion';
-import { trackByIndex } from '../../../shared/utils/track-by';
 
 const range = 10;
 const numStars = 5;
@@ -50,7 +48,7 @@ export class StarRatingComponent {
     return this._showRating;
   }
   tooltipText = `0 average rating`;
-  trackByIndex: TrackByFunction<number> = trackByIndex();
+  trackByIndex = (index: number) => index;
 
   private _rating = 5;
   @Input()
