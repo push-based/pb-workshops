@@ -1,80 +1,72 @@
-# ChangeDetection
+# State Management
 
-## trackBy
+## Local State
 
-**(optional) trackByProp util**
+### 01 simple local state
 
-* implement `trackByProp` util function
-* `src/app/shared/utils/track-by.ts`
-
-```ts
-export const trackByProp: <T>(prop: keyof T) => TrackByFunction<T> =
-  <T>(prop: keyof T) =>
-    (_: number, item: T) =>
-      item[prop];
-```
-
-**movie-list.component.ts**
-
-* add `app-dirty-check` to movie-item template
-
-```html
-<!-- movie-list.component.html -->
-
- <a
-    class='movies-list--grid-item'
-    *ngFor='let movie of _movies'
-    (click)='toMovie(movie)'
-  >
-    <app-dirty-check></app-dirty-check>
-    <!-- movie-list-item content -->
-</a>
-```
-
-* run
-* add trackBy to `*ngFor="let movie of movies;"`
-* run again
+* go to `src/app/app-shell/app-shell.component.ts`
+* create local `state$` and `viewModel$` variables
 
 ```ts
-// movie-list.component.html
+// app-shell.component.ts
 
-// use util function
-trackMovie = trackByProp<Movie>('id');
-// or implement it plain
-movieById(_: number, movie: Movie) {
-  return movie.id;
+private state$ = new BehaviorSubject<{
+  activeRoute: string;
+  genres: MovieGenreModel[]
+}>({
+  activeRoute: '',
+  genres: []
+});
+
+viewModel$ = this.state$;
+```
+
+* "connect" variables to local state
+
+```ts
+// app-shell.component.ts
+
+private activeRoute$ = this.router.events.pipe(
+  filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+  map((e) => e.urlAfterRedirects.split('?')[0])
+);
+
+private genres$ = this.movieService.getGenres();
+
+constructor() {
+  this.genres$
+    .subscribe(genres => {
+      this.state$.next({
+        genres,
+        activeRoute: this.state$.getValue().activeRoute
+      })
+    });
+  this.activeRoute$.subscribe(activeRoute => {
+    this.state$.next({
+      genres: this.state$.getValue().genres,
+      activeRoute: activeRoute
+    })
+  });
 }
 ```
 
-**app-shell.component.ts**
-
-* add `app-dirty-check` to genre-item template
+* use `viewModel$` in the view
 
 ```html
 <!-- app-shell.component.html -->
 
-<a
-  *ngFor="
-          let genre of genres$ | async;
-        "
-  class="navigation--link"
-  [class.active]="(activeRoute$ | async) === '/list/genre/' + genre.id"
-  (click)="navTo('/list', ['genre', genre.id])"
+<app-side-drawer
+  [opened]="sideDrawerOpen"
+  (openedChange)="closeSidenav()"
+  *ngIf="viewModel$ | async as vm"
 >
-  <app-dirty-check></app-dirty-check>
-  <!-- genre-item content -->
-</a>
+</app-side-drawer>
 ```
 
-* run
-* add trackBy to `*ngFor="let genre of genres$ | async;"`
-* run again
+* replace occurrences of `(activeRoute$ | async)` with `vm.activeRoute`
 
-```ts
-// use util function
-trackGenre = trackByProp<MovieGenreModel>('name');
-// or implement it plain
-trackGenre(index: number, genre: MovieGenreModel) {
-  return genre.name;
-}
-```
+**Optional**
+
+introduce `sideDrawerOpen: boolean` to the state
+
+
