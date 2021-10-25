@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { RxState } from '@rx-angular/state';
+import { filter, map, Subject } from 'rxjs';
 import { MovieDataService } from '../data-access/api/movie-data.service';
 import { MovieGenreModel } from '../shared/model/index';
 import { trackByProp } from '../shared/utils/track-by';
@@ -11,19 +12,15 @@ import { trackByProp } from '../shared/utils/track-by';
   styleUrls: ['./app-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppShellComponent implements OnInit {
+export class AppShellComponent extends RxState<{
+  activeRoute: string;
+  genres: MovieGenreModel[];
+  sideDrawerOpen: boolean
+}> implements OnInit {
 
-  sideDrawerOpen = false;
+  viewModel$ = this.select();
 
-  private state$ = new BehaviorSubject<{
-    activeRoute: string;
-    genres: MovieGenreModel[]
-  }>({
-    activeRoute: '',
-    genres: []
-  });
-
-  viewModel$ = this.state$;
+  toggleSideDrawer = new Subject<void>();
 
   private activeRoute$ = this.router.events.pipe(
     filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -36,24 +33,23 @@ export class AppShellComponent implements OnInit {
     private router: Router,
     private movieService: MovieDataService
   ) {
-    this.genres$
-      .subscribe(genres => {
-        this.state$.next({
-          genres,
-          activeRoute: this.state$.getValue().activeRoute
-        })
-      });
-    this.activeRoute$.subscribe(activeRoute => {
-      this.state$.next({
-        genres: this.state$.getValue().genres,
-        activeRoute: activeRoute
-      })
-    });
+    super();
   }
 
   trackGenre = trackByProp<MovieGenreModel>('name');
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.set({
+      genres: [],
+      activeRoute: '',
+      sideDrawerOpen: false
+    });
+    this.connect('genres', this.genres$);
+    this.connect('activeRoute', this.activeRoute$);
+    this.connect('sideDrawerOpen', this.toggleSideDrawer, (oldState) => {
+      return !oldState.sideDrawerOpen
+    });
+  }
 
   navTo(path: string, args: (string | number)[], queryParams?: Record<string, any>) {
     this.closeSidenav();
@@ -61,7 +57,7 @@ export class AppShellComponent implements OnInit {
   }
 
   closeSidenav() {
-    this.sideDrawerOpen = false;
+    this.set({ sideDrawerOpen: false });
   }
 
 }

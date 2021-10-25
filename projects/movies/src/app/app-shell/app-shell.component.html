@@ -1,5 +1,5 @@
 <app-side-drawer
-  [opened]="sideDrawerOpen"
+  [opened]="vm.sideDrawerOpen"
   (openedChange)="closeSidenav()"
   *ngIf="viewModel$ | async as vm"
 >
@@ -123,7 +123,7 @@
   <div class="app-toolbar">
     <app-hamburger-button
       class="app-toolbar--action"
-      (click)="sideDrawerOpen = !sideDrawerOpen"
+      (click)="toggleSideDrawer.next()"
     >
     </app-hamburger-button>
     <div class="app-toolbar--widget-container">
