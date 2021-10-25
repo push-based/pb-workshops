@@ -1,66 +1,5 @@
 # ChangeDetection
 
-## Dirty Check
-
-**dirty-check.component.ts** (optional)
-
-* implement dirty-check.component.ts
-* `src/app/ui/atoms/dirty-check.component.ts`
-
-```ts
-@Component({
-  selector: 'app-dirty-check',
-  template: `{{ check() }}`
-})
-export class DirtyCheckComponent {
-    private _checked = 0;
-    check() {
-        return this._checked++;
-    }
-}
-// obsolete in v13 (experimental)
-@NgModule({
-  imports: [],
-  exports: [DirtyCheckComponent],
-  declarations: [DirtyCheckComponent],
-})
-export class DirtyCheckComponentModule {}
-```
-
-## CD OnPush
-
-**movie-list.component**
-
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* data still shown, checked() count is 1
-
-**movie-list-page.component**
-
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* movies missing, how to fix?
-  * `cdRef#markForCheck`
-  * `movies$` => async pipe
-  
-**app-shell.component**
-
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* genres missing, how to fix?
-  * `cdRef#markForCheck`
-  * `genres$` => async pipe
-
-* **app.component**
-
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* run again
-
 ## trackBy
 
 **(optional) trackByProp util**
@@ -78,11 +17,27 @@ export const trackByProp: <T>(prop: keyof T) => TrackByFunction<T> =
 **movie-list.component.ts**
 
 * add `app-dirty-check` to movie-item template
+
+```html
+<!-- movie-list.component.html -->
+
+ <a
+    class='movies-list--grid-item'
+    *ngFor='let movie of _movies'
+    (click)='toMovie(movie)'
+  >
+    <app-dirty-check></app-dirty-check>
+    <!-- movie-list-item content -->
+</a>
+```
+
 * run
 * add trackBy to `*ngFor="let movie of movies;"`
 * run again
 
 ```ts
+// movie-list.component.html
+
 // use util function
 trackMovie = trackByProp<Movie>('id');
 // or implement it plain
@@ -94,8 +49,25 @@ movieById(_: number, movie: Movie) {
 **app-shell.component.ts**
 
 * add `app-dirty-check` to genre-item template
+
+```html
+<!-- app-shell.component.html -->
+
+<a
+  *ngFor="
+          let genre of genres$ | async;
+        "
+  class="navigation--link"
+  [class.active]="(activeRoute$ | async) === '/list/genre/' + genre.id"
+  (click)="navTo('/list', ['genre', genre.id])"
+>
+  <app-dirty-check></app-dirty-check>
+  <!-- genre-item content -->
+</a>
+```
+
 * run
-* add trackBy to `*ngFor="let genre of genres;"`
+* add trackBy to `*ngFor="let genre of genres$ | async;"`
 * run again
 
 ```ts
@@ -106,4 +78,3 @@ trackGenre(index: number, genre: MovieGenreModel) {
   return genre.name;
 }
 ```
-
