@@ -35,7 +35,11 @@ export class AppShellComponent implements OnInit {
   constructor(
     private router: Router,
     private movieService: MovieDataService
-  ) {
+  ) {}
+
+  trackGenre = trackByProp<MovieGenreModel>('name');
+
+  ngOnInit() {
     this.genres$
       .subscribe(genres => {
         this.state$.next({
@@ -50,10 +54,6 @@ export class AppShellComponent implements OnInit {
       })
     });
   }
-
-  trackGenre = trackByProp<MovieGenreModel>('name');
-
-  ngOnInit() {}
 
   navTo(path: string, args: (string | number)[], queryParams?: Record<string, any>) {
     this.closeSidenav();
