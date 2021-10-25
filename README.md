@@ -2,71 +2,67 @@
 
 ## Local State
 
-### 01 simple local state
+### 02 simple local state structured
 
-* go to `src/app/app-shell/app-shell.component.ts`
-* create local `state$` and `viewModel$` variables
+* introduce `RxState` to the component
 
 ```ts
 // app-shell.component.ts
 
-private state$ = new BehaviorSubject<{
+export class AppShellComponent extends RxState<{
   activeRoute: string;
-  genres: MovieGenreModel[]
-}>({
-  activeRoute: '',
-  genres: []
-});
-
-viewModel$ = this.state$;
+  genres: MovieGenreModel[];
+  sideDrawerOpen: boolean
+}> implements OnInit {
+  
+  viewModel$ = this.select();
+}
 ```
 
-* "connect" variables to local state
+* connect state slices & set initial state
 
 ```ts
 // app-shell.component.ts
 
-private activeRoute$ = this.router.events.pipe(
-  filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-  map((e) => e.urlAfterRedirects.split('?')[0])
-);
-
-private genres$ = this.movieService.getGenres();
-
-constructor() {
-  this.genres$
-    .subscribe(genres => {
-      this.state$.next({
-        genres,
-        activeRoute: this.state$.getValue().activeRoute
-      })
-    });
-  this.activeRoute$.subscribe(activeRoute => {
-    this.state$.next({
-      genres: this.state$.getValue().genres,
-      activeRoute: activeRoute
-    })
+ngOnInit() {
+  // set initial state
+  this.set({
+    genres: [],
+    activeRoute: '',
+    sideDrawerOpen: false
+  });
+  // connect state slices
+  this.connect('genres', this.genres$);
+  this.connect('activeRoute', this.activeRoute$);
+  this.connect('sideDrawerOpen', this.toggleSideDrawer, (oldState) => {
+    return !oldState.sideDrawerOpen
   });
 }
 ```
 
-* use `viewModel$` in the view
+* set `sideDrawerOpen` state on `closeSidenav`
+```ts
+closeSidenav() {
+  this.set({ sideDrawerOpen: false });
+}
+```
+
+* replace `sideDrawerOpen` occurrences in template
 
 ```html
 <!-- app-shell.component.html -->
 
 <app-side-drawer
-  [opened]="sideDrawerOpen"
+  [opened]="vm.sideDrawerOpen"
   (openedChange)="closeSidenav()"
   *ngIf="viewModel$ | async as vm"
 >
+<!-- .. template .. -->
+  
+  <app-hamburger-button
+    class="app-toolbar--action"
+    (click)="toggleSideDrawer.next()"
+  >
+  </app-hamburger-button>
 </app-side-drawer>
 ```
-
-* replace occurrences of `(activeRoute$ | async)` with `vm.activeRoute`
-
-**Optional**
-
-introduce `sideDrawerOpen: boolean` to the state
-
-
