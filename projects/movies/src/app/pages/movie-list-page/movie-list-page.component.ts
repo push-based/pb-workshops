@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, map, Observable, switchMap } from 'rxjs';
@@ -20,14 +20,30 @@ type RouterParams = {
         width: 100%;
       }
     `
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovieListPageComponent implements OnInit {
-  movies: MovieModel[] = [];
   title: string = '';
 
   private routerParams$: Observable<RouterParams> = this.route.params as unknown as Observable<RouterParams>;
 
+  movies$: Observable<MovieModel[]> = this.routerParams$.pipe(
+    switchMap(({ identifier, type }) => {
+      switch (type) {
+        case 'category':
+          return this.movieData.getMovieCategory(identifier).pipe(
+            map(response => response.results)
+          );
+        case 'genre':
+          return this.movieData.getMovieGenre(identifier).pipe(
+            map(response => response.results)
+          );
+        default:
+          return EMPTY;
+      }
+    }),
+  );
 
   constructor(
     private route: ActivatedRoute,
@@ -36,24 +52,5 @@ export class MovieListPageComponent implements OnInit {
 
   }
 
-  ngOnInit() {
-    this.routerParams$.pipe(
-      switchMap(({ identifier, type }) => {
-        switch (type) {
-          case 'category':
-            return this.movieData.getMovieCategory(identifier).pipe(
-              map(response => response.results)
-            );
-          case 'genre':
-            return this.movieData.getMovieGenre(identifier).pipe(
-              map(response => response.results)
-            );
-          default:
-            return EMPTY;
-        }
-      }),
-    ).subscribe(movies => {
-      this.movies = movies;
-    })
-  }
+  ngOnInit() {}
 }

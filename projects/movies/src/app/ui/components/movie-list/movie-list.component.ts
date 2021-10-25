@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MovieModel } from '../../../shared/model/index';
 import { W300H450 } from '../../../shared/utils/image-sizes';
@@ -10,7 +10,8 @@ interface Movie extends MovieModel {
 @Component({
   selector: 'app-movie-list',
   templateUrl: './movie-list.component.html',
-  styleUrls: ['./movie-list.component.scss']
+  styleUrls: ['./movie-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovieListComponent {
   W300H450 = W300H450;

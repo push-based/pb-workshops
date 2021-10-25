@@ -76,7 +76,7 @@
     <h2 class="navigation--headline">Genres</h2>
     <a
       *ngFor="
-          let genre of genres;
+          let genre of genres$ | async;
         "
       class="navigation--link"
       [class.active]="(activeRoute$ | async) === '/list/genre/' + genre.id"

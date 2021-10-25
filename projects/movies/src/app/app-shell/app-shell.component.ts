@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { MovieDataService } from '../data-access/api/movie-data.service';
@@ -7,7 +7,8 @@ import { MovieGenreModel } from '../shared/model/index';
 @Component({
   selector: 'app-shell',
   templateUrl: './app-shell.component.html',
-  styleUrls: ['./app-shell.component.scss']
+  styleUrls: ['./app-shell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppShellComponent implements OnInit {
 
@@ -18,7 +19,7 @@ export class AppShellComponent implements OnInit {
     map((e) => e.urlAfterRedirects.split('?')[0])
   );
 
-  genres: MovieGenreModel[] = [];
+  genres$ = this.movieService.getGenres();
 
   constructor(
     private router: Router,
@@ -26,12 +27,7 @@ export class AppShellComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-    this.movieService.getGenres()
-      .subscribe(response => {
-        this.genres = response;
-      });
-  }
+  ngOnInit() {}
 
   navTo(path: string, args: (string | number)[], queryParams?: Record<string, any>) {
     this.closeSidenav();
