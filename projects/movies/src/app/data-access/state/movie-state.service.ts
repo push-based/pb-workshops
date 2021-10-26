@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { RxState, selectSlice } from '@rx-angular/state';
 import {
-  distinctUntilChanged,
+  distinctUntilChanged, endWith,
   map,
-  merge,
+  merge, mergeMap,
   Observable,
-  OperatorFunction,
+  OperatorFunction, startWith,
   Subject,
   switchMap
 } from 'rxjs';
 import { MovieGenreModel } from '../../shared/model/movie-genre.model';
 import { MovieModel } from '../../shared/model/movie.model';
+import { createDeepMergeAccumulator } from '../../shared/utils/deep-merge-accumulator';
 import { exhaustFetch } from '../../shared/utils/exhaust-fetch';
 import { MovieDataService } from '../api/movie-data.service';
 
@@ -45,6 +46,7 @@ export interface MovieState {
   movies: MovieModel[];
   loading: boolean;
   error: any;
+  updating: Record<string, boolean>;
 }
 
 
@@ -55,23 +57,37 @@ export class MovieStateService extends RxState<MovieState> {
 
   genres$ = this.select('genres');
   movieList$ = this.select(
-    selectSlice(['movies', 'error', 'loading'])
+    selectSlice(['movies', 'error', 'loading', 'updating'])
   );
 
   private loadMovieCategory$ = new Subject<string>();
   private loadMovieGenre$ = new Subject<MovieGenrePayload>();
 
+  private updateMovieRating$ = new Subject<{ movie: MovieModel; rating: number}>();
+
   constructor(
     private movieData: MovieDataService
   ) {
     super();
+    this.setAccumulator(createDeepMergeAccumulator(['updating']));
     this.set({
       genres: [],
       loading: false,
       movies: [],
-      error: null
+      error: null,
+      updating: {}
     });
     this.connect('genres', movieData.getGenres());
+    this.connect(
+      this.updateMovieRating$.pipe(
+        mergeMap(({ movie, rating }) => {
+          return this.movieData.updateMovieRating(movie.id, rating).pipe(
+            startWith({ updating: { [movie.id]: true  }}),
+            endWith({ updating: { [movie.id]: false  }})
+          );
+        })
+      )
+    );
     // connect movies, loading, error
     this.connect(
       this.fetchMoviesAction$()
@@ -96,6 +112,12 @@ export class MovieStateService extends RxState<MovieState> {
     sortBy: string = 'popularity.desc'
   ) {
     this.loadMovieGenre$.next({ genreId, page, sortBy });
+  }
+
+  updateMovieRating(
+    payload: { movie: MovieModel, rating: number }
+  ) {
+    this.updateMovieRating$.next(payload);
   }
 
   private fetchMoviesAction$ = (): Observable<MovieFetchPayload> => merge(
