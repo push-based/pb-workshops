@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  Input
+  Component, EventEmitter,
+  Input, Output
 } from '@angular/core';
 import {
   coerceNumberProperty,
@@ -18,9 +18,11 @@ const starsArray: number[] = new Array(numStars).fill(1);
         {{ tooltipText }}
       </span>
     <div class="stars">
+      <span *ngIf="selectedStar" class="star">{{ selectedStar }}</span>
         <span
-          *ngFor="let fill of stars; trackBy: trackByIndex"
+          *ngFor="let fill of stars; let i = index; trackBy: trackByIndex"
           class="star"
+          (click)="onStarSelect(i + 1)"
           [ngClass]="{
             'star-half': fill === 0,
             'star-empty': fill === -1
@@ -60,6 +62,15 @@ export class StarRatingComponent {
   }
   get rating(): number {
     return this._rating;
+  }
+
+  @Output() readonly selectionChange = new EventEmitter<number>();
+
+  selectedStar = 0;
+
+  onStarSelect(star: number) {
+    this.selectedStar = star;
+    this.selectionChange.next(star);
   }
 
   setToolTopText(rating: number) {

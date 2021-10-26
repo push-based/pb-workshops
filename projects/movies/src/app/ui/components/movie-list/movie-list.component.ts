@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MovieModel } from '../../../shared/model/index';
 import { W300H450 } from '../../../shared/utils/image-sizes';
@@ -27,6 +27,13 @@ export class MovieListComponent {
   }
 
   @Input() adult?: string;
+
+  @Input() movieLoading: Record<string, boolean> = {};
+
+  @Output() ratingUpdated = new EventEmitter<{
+    movie: MovieModel;
+    rating: number;
+  }>();
 
   get hasMovies(): boolean {
     return this._movies?.length > 0;

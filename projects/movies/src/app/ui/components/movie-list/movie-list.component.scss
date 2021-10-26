@@ -1,3 +1,15 @@
+app-loader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--palette-action-disabled);
+  min-height: unset;
+  z-index: 2;
+  user-select: all;
+}
+
 .movies-list--grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 25rem));
@@ -54,6 +66,8 @@
       justify-content: space-between;
       align-items: center;
       padding: 1.5rem 3rem;
+      position: relative;
+
       @media only screen and (max-width: 500px) {
         padding: 1.5rem;
       }

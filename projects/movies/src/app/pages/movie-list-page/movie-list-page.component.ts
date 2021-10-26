@@ -6,7 +6,7 @@ import {
   catchError,
   endWith,
   exhaustMap,
-  map,
+  map, mergeMap,
   Observable,
   of,
   startWith,
@@ -15,6 +15,7 @@ import {
 } from 'rxjs';
 import { MovieDataService } from '../../data-access/api/movie-data.service';
 import { MovieModel } from '../../shared/model/index';
+import { createDeepMergeAccumulator } from '../../shared/utils/deep-merge-accumulator';
 
 
 type RouterParams = {
@@ -26,6 +27,7 @@ interface MovieListState {
   movies: MovieModel[];
   loading: boolean;
   error: any;
+  updating: Record<string, boolean>;
 }
 interface FetchState {
   loading: boolean;
@@ -69,6 +71,7 @@ export class MovieListPageComponent
   private routerParams$: Observable<RouterParams> = this.route.params as unknown as Observable<RouterParams>;
 
   private loadMovies$ = new Subject<void>();
+  private updateMovieRating$ = new Subject<{ movie: MovieModel; rating: number}>();
 
   private movieListState$ = this.routerParams$.pipe(
     switchMap(({ identifier, type }) => {
@@ -89,10 +92,27 @@ export class MovieListPageComponent
     private movieData: MovieDataService
   ) {
     super();
+    this.setAccumulator(createDeepMergeAccumulator(['updating']));
+    this.set({
+      loading: true,
+      updating: {},
+      error: null,
+      movies: []
+    });
   }
 
   ngOnInit() {
     this.connect(this.movieListState$);
+    this.connect(
+      this.updateMovieRating$.pipe(
+        mergeMap(({ movie, rating }) => {
+          return this.movieData.updateMovieRating(movie.id, rating).pipe(
+            startWith({ updating: { [movie.id]: true  }}),
+            endWith({ updating: { [movie.id]: false  }})
+          );
+        })
+      )
+    );
     this.hold(
       this.select('error'),
       error => {
@@ -101,6 +121,10 @@ export class MovieListPageComponent
         }
       }
     )
+  }
+
+  movieRatingUpdated(update: { movie: MovieModel, rating: number }) {
+    this.updateMovieRating$.next(update);
   }
 
   loadMovies() {

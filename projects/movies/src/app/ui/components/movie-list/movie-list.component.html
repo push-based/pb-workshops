@@ -17,11 +17,14 @@
         />
       </app-aspect-ratio-box>
     </div>
-    <div class='movies-list--grid-item__details'>
+    <div class='movies-list--grid-item__details' (click)="$event.stopPropagation()">
+      <app-loader *ngIf="movieLoading && movieLoading[movie.id]"></app-loader>
       <h2 class='movies-list--grid-item__details-title'>
         {{ movie.title }}
       </h2>
-      <app-star-rating [rating]='movie.vote_average'></app-star-rating>
+      <app-star-rating
+        (selectionChange)="ratingUpdated.emit({ movie: movie, rating: $event })"
+        [rating]='movie.vote_average'></app-star-rating>
     </div>
   </a>
   <div class='pagination'></div>

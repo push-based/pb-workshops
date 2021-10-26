@@ -2,6 +2,9 @@
   <button (click)="loadMovies()">refresh list</button>
   <app-loader *ngIf="vm.loading; else: movieList"></app-loader>
   <ng-template #movieList>
-    <app-movie-list [movies]="vm.movies"></app-movie-list>
+    <app-movie-list
+      [movieLoading]="vm.updating"
+      (ratingUpdated)="movieRatingUpdated($event)"
+      [movies]="vm.movies"></app-movie-list>
   </ng-template>
 </div>
