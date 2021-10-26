@@ -54,7 +54,7 @@ export class DirtyCheckComponentModule {}
   * `cdRef#markForCheck`
   * `genres$` => async pipe
 
-* **app.component**
+**app.component**
 
 * add `app-dirty-check` to template
 * run
