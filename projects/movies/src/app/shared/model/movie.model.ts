@@ -16,3 +16,5 @@ export interface MovieModel {
     video: boolean;
     vote_average: number;
 }
+
+export type MovieCategory = 'popular' | 'top_rated' | 'upcoming';

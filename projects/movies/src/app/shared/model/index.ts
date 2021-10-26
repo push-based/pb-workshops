@@ -1,4 +1,4 @@
-export { MovieModel } from './movie.model';
+export { MovieModel, MovieCategory } from './movie.model';
 export { MovieCastModel } from './movie-cast.model';
 export { MovieCategoryModel } from './movie-category.model';
 export { MovieCreditsModel } from './movie-credits.model';
