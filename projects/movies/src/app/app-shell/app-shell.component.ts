@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { RxState } from '@rx-angular/state';
 import { filter, map, Subject } from 'rxjs';
-import { MovieDataService } from '../data-access/api/movie-data.service';
+import { MovieStateService } from '../data-access/state/movie-state.service';
 import { MovieGenreModel } from '../shared/model/index';
 import { trackByProp } from '../shared/utils/track-by';
 
@@ -27,11 +27,9 @@ export class AppShellComponent extends RxState<{
     map((e) => e.urlAfterRedirects.split('?')[0])
   );
 
-  private genres$ = this.movieService.getGenres();
-
   constructor(
     private router: Router,
-    private movieService: MovieDataService
+    private movieState: MovieStateService
   ) {
     super();
   }
@@ -44,7 +42,7 @@ export class AppShellComponent extends RxState<{
       activeRoute: '',
       sideDrawerOpen: false
     });
-    this.connect('genres', this.genres$);
+    this.connect('genres', this.movieState.genres$);
     this.connect('activeRoute', this.activeRoute$);
     this.connect('sideDrawerOpen', this.toggleSideDrawer, (oldState) => {
       return !oldState.sideDrawerOpen

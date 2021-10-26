@@ -3,17 +3,15 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { RxState } from '@rx-angular/state';
 import {
-  catchError,
+  combineLatest,
   endWith,
-  exhaustMap,
   map, mergeMap,
   Observable,
-  of,
   startWith,
   Subject,
-  switchMap
 } from 'rxjs';
 import { MovieDataService } from '../../data-access/api/movie-data.service';
+import { MovieStateService } from '../../data-access/state/movie-state.service';
 import { MovieModel } from '../../shared/model/index';
 import { createDeepMergeAccumulator } from '../../shared/utils/deep-merge-accumulator';
 
@@ -28,26 +26,6 @@ interface MovieListState {
   loading: boolean;
   error: any;
   updating: Record<string, boolean>;
-}
-interface FetchState {
-  loading: boolean;
-  error: any;
-}
-
-function exhaustFetch<T extends FetchState>(
-  trigger$: Observable<void>,
-  data$: Observable<Partial<T>>
-): Observable<Partial<T>> {
-  return trigger$.pipe(
-    startWith(null),
-    exhaustMap(() => {
-      return data$.pipe(
-        catchError(e => of({ error: e} as Partial<T>)),
-        startWith({ loading: true, error: null } as Partial<T>),
-        endWith({ loading: false } as Partial<T>)
-      );
-    })
-  )
 }
 
 @Component({
@@ -73,23 +51,10 @@ export class MovieListPageComponent
   private loadMovies$ = new Subject<void>();
   private updateMovieRating$ = new Subject<{ movie: MovieModel; rating: number}>();
 
-  private movieListState$ = this.routerParams$.pipe(
-    switchMap(({ identifier, type }) => {
-      const data$ = type === 'category' ?
-                  this.movieData.getMovieCategory(identifier) :
-                  this.movieData.getMovieGenre(identifier);
-      return exhaustFetch<MovieListState>(
-        this.loadMovies$,
-        data$.pipe(map(response => ({
-          movies: response.results
-        })))
-      )
-    })
-  );
-
   constructor(
     private route: ActivatedRoute,
-    private movieData: MovieDataService
+    private movieData: MovieDataService,
+    private movieState: MovieStateService
   ) {
     super();
     this.setAccumulator(createDeepMergeAccumulator(['updating']));
@@ -102,7 +67,10 @@ export class MovieListPageComponent
   }
 
   ngOnInit() {
-    this.connect(this.movieListState$);
+    this.loadSideEffect();
+    this.errorSideEffect();
+    this.connectMovieState();
+    this.loadMovies();
     this.connect(
       this.updateMovieRating$.pipe(
         mergeMap(({ movie, rating }) => {
@@ -113,14 +81,6 @@ export class MovieListPageComponent
         })
       )
     );
-    this.hold(
-      this.select('error'),
-      error => {
-        if (error) {
-          alert(error.message);
-        }
-      }
-    )
   }
 
   movieRatingUpdated(update: { movie: MovieModel, rating: number }) {
@@ -129,5 +89,36 @@ export class MovieListPageComponent
 
   loadMovies() {
     this.loadMovies$.next();
+  }
+
+  private connectMovieState() {
+    this.connect(this.movieState.movieList$);
+  }
+
+  private loadSideEffect() {
+    this.hold(
+      combineLatest([
+        this.routerParams$,
+        this.loadMovies$
+      ]).pipe(map(([routerParams]) => routerParams)),
+      ({ identifier, type }) => {
+        if (type === 'category') {
+          this.movieState.loadMovieCategory(identifier);
+        } else {
+          this.movieState.loadMovieGenre(identifier);
+        }
+      }
+    );
+  }
+
+  private errorSideEffect() {
+    this.hold(
+      this.select('error'),
+      error => {
+        if (error) {
+          alert(error.message);
+        }
+      }
+    );
   }
 }
