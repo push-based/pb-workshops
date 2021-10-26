@@ -230,12 +230,3 @@ private movieListState$ = this.routerParams$.pipe(
   })
 );
 ```
-
-### 03 manage list state (with per-item update)
-
-**app-shell.component**
-
-* activeRoute$ | async pipe usage (ngFor)
-  * shareReplay()
-  * *ngIf= (o$ | async) as
-* subscribe => genre = result
