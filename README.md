@@ -2,11 +2,162 @@
 
 ## Local State
 
-### 03 manage list state
+### 04 manage list state with per-item update
+
+go to `src/app/ui/atoms/star-rating/star-rating.component.ts`
+
+Let's start by extending the star-rating component. We want users to be able to 
+click on a star and show the selected value as first item.
+
+```ts
+// star-rating.component.ts
+
+selectedStar = 0;
+
+onStarSelect(star: number) {
+  this.selectedStar = star;
+}
+```
+
+additionally, introduce an `@Output()` to inform other components about the change.
+
+```ts
+// star-rating.component.ts
+
+@Output() readonly selectionChange = new EventEmitter<number>();
+
+onStarSelect(star: number) {
+  this.selectedStar = star;
+  this.selectionChange.next(star);
+}
+```
+
+call the function from the template and show the selected star
+
+```html
+// star-rating.component.ts
+
+<div class="stars">
+  <!-- show selected star -->
+  <span *ngIf="selectedStar" class="star">{{ selectedStar }}</span>
+  <!-- for simplicity we just use the index as star value -->
+  <span
+    *ngFor="let fill of stars; let i = index; trackBy: trackByIndex"
+    class="star"
+    (click)="onStarSelect(i + 1)"
+    [ngClass]="{
+            'star-half': fill === 0,
+            'star-empty': fill === -1
+          }"
+    style
+  >★</span
+  >
+</div>
+```
+
+Run the application and check if the new feature is actually working as expected.
+
+Next, we want to pass through the `selectionChange` event to the place where we actually
+have contact to the `DataService`. 
+For this, we need to pass the `selectionChange` event from `movie-list.component`
+to `movie-list-page.component`
+
+go to `src/app/ui/components/movie-list.component.ts`
+
+Define an `@Output()` to pass through the event and enrich it with information about the
+actual `Movie` we wannt to update.
+
+```ts
+// movie-list.component.ts
+
+@Output() ratingUpdated = new EventEmitter<{
+  movie: MovieModel;
+  rating: number;
+}>();
+```
+
+```html
+<!-- movie-list.component.html -->
+
+<!-- $event.stopPropagation() to not trigger routing when clicking details -->
+<div class='movies-list--grid-item__details'
+     (click)="$event.stopPropagation()">
+  <h2 class='movies-list--grid-item__details-title'>
+    {{ movie.title }}
+  </h2>
+  <!-- use the selectionChange event and enrich it with information -->
+  <app-star-rating
+    (selectionChange)="ratingUpdated.emit({ movie: movie, rating: $event })"
+    [rating]='movie.vote_average'></app-star-rating>
+</div>
+```
+
+Now we are ready to send the value to our smart-component.
+
+**Optional: if not checkout out this branch**
+
+If you have not checked out this branch, we need to first introduce the method
+`updateMovieRating` to `MovieDataService`.
+
+go to `src/app/data-access/api/movie-data.service.ts`.
+
+```ts
+// movie-data.service.ts
+
+// just a mock
+updateMovieRating = (
+  movieId: number,
+  rating: number
+): Observable<any> => timer(2500);
+```
+
+Let's prepare the update trigger and the state transition in our smart-component.
 
 go to `src/app/pages/movie-list-page.component.ts`
 
-Introduce `MovieListState` interface
+```ts
+// movie-list-page.component.ts
+
+private updateMovieRating$ = new Subject<{ movie: MovieModel; rating: number}>();
+
+movieRatingUpdated(update: { movie: MovieModel, rating: number }) {
+  this.updateMovieRating$.next(update);
+}
+
+ngOnInit() {
+  // ...
+  // register the update as side-effect
+  this.hold(
+    this.updateMovieRating$.pipe(
+      mergeMap(({ movie, rating }) => {
+        return this.movieData.updateMovieRating(movie.id, rating);
+      })
+    )
+  );
+}
+```
+
+As final step, we need to connect the `ratingUpdated` output to our change trigger:
+
+```html
+<!-- movie-list.component.html -->
+<app-movie-list
+  (ratingUpdated)="movieRatingUpdated($event)"
+  [movies]="vm.movies"></app-movie-list>
+```
+
+We are now able to perform an update request per list-item as side-effect.
+
+### Bonus: per-item loading state
+
+Let's try to improve the UX by introducing a loading state while performing the update
+which indicates progress to our users.
+
+Let's first find a valid data-structure to store our per-item loading state and extend 
+our local state interface.
+
+Since we want to have optimal reading speed in the template, I would consider using a
+`Map` like structure.
 
 ```ts
 // movie-list-page.component.ts
@@ -15,218 +166,224 @@ interface MovieListState {
   movies: MovieModel[];
   loading: boolean;
   error: any;
+  updating: Record<string, boolean>; // map of movieIds => boolean (updating)
 }
 ```
 
-Introduce `RxState<MovieListState>` & `viewModel$` 
+What we want to do now, is to set the loading state of a movie id to true when
+the request gets send and turn it back to false when the response is here.
 
 ```ts
 // movie-list-page.component.ts
 
-export class MovieListPageComponent
-  extends RxState<MovieListState> {
-  
-  viewModel$ = this.select();
+ngOnInit() {
+  //...
+  // change hold to connect, since we now want to connect something to the state
+  // instead of registering a pure side-effect
+  this.connect(
+    this.updateMovieRating$.pipe(
+      mergeMap(({ movie, rating }) => {
+        return this.movieData.updateMovieRating(movie.id, rating).pipe(
+          // the request is finished here
+          map(() => ({ updating: {
+              ...this.get('updating'), // don't lose old values
+              [movie.id]: false // set movie.id to false
+            }
+          })),
+          // start with a loading true value
+          startWith({ updating: {
+              ...this.get('updating'), // don't lose old values
+              [movie.id]: true // set loading to true
+            }
+          }),
+        );
+      })
+    )
+  );
+}
+```
+
+we have now a loading map for movies as `Record<string, boolean>`, let's use it in the 
+template to reflect that state in the view.
+
+go to `src/app/ui/components/movie-list/movie-list.component.ts` and add an `@Input()`
+to hand over the loading map.
+
+```ts
+// movie-list.component.ts
+
+@Input() movieLoading: Record<string, boolean> = {};
+
+```
+
+do the handover in `movie-list-page.component.html`
+
+```html
+<!-- movie-list-page.component.html -->
+
+<ng-template #movieList>
+  <app-movie-list
+    [movieLoading]="vm.updating"
+    (ratingUpdated)="movieRatingUpdated($event)"
+    [movies]="vm.movies"></app-movie-list>
+</ng-template>
+```
+
+finally, show a loading component in `movie-list.component.html` and adjust the 
+styling to make it look somewhat decent.
+
+```html
+<!-- movie-list.component.html -->
+
+<div class='movies-list--grid-item__details' (click)="$event.stopPropagation()">
+  <!-- show loader component when movie is loading -->
+  <app-loader *ngIf="movieLoading && movieLoading[movie.id]"></app-loader>
+  <!-- item content -->
+</div>
+```
+
+```sass
+// movie-list.component.scss
+
+app-loader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--palette-action-disabled);
+  min-height: unset;
+  z-index: 2;
+  user-select: all;
+}
+```
+
+### Bonus+: implement customAccumulator
+
+Let's simplify our code in `movie-list-page.component.ts` and implement
+a re-usable utility function to handle `Map` structures.
+This way we can get rid of our `don't lose old values` hack.
+
+```ts
+map(() => ({ updating: {
+    ...this.get('updating'), // don't lose old values
+    [movie.id]: false // set movie.id to false
+  }
+})),
+// start with a loading true value
+startWith({ updating: {
+    ...this.get('updating'), // don't lose old values
+    [movie.id]: true // set loading to true
+  }
+}),
+```
+
+The goal is to transition the above snippet of code into something like:
+
+```ts
+startWith({ updating: { [movie.id]: true } }),
+endWith({ updating: { [movie.id]: false } })
+```
+
+For this, let's introduce a `customAccumulator` which will handle deepMerging for us.
+
+create `deep-merge-accumulator.ts` util file in `src/app/shared/utils`
+
+Simple version, only works for scenarios where configured keys are set.
+
+```ts
+set({ updating: [id]: true }) // possible;
+set({ updating: [id]: true, movies: [] }) // corrupt state;
+```
+
+```ts
+// deep-merge-accumulator.ts
+
+import { AccumulationFn } from '@rx-angular/state/lib/cdk';
+
+export function createSimpleDeepMergeAccumulator<T>(keys: (keyof T)[]) {
+  return ((state: T, update: Partial<T>) => {
+    // look for configured keys having a value
+    const theKeysArray = keys.filter(i => update[i] != null);
+    if (theKeysArray.length) {
+      // we need to perform deepMerge
+      const newUpdate = theKeysArray.reduce(
+        (acc, i) => ({ ...acc, [i]: { ...state[i], ...update[i] } }),
+        {}
+      );
+      // return updated state
+      return { ...state, ...newUpdate };
+    }
+    // return default accumulator
+    return { ...state, ...update };
+  }) as AccumulationFn;
+}
+```
+
+more sophisticated version, works for all scenarios
+
+```ts
+// deep-merge-accumulator.ts
+
+import { AccumulationFn } from '@rx-angular/state/lib/cdk';
+
+export function createDeepMergeAccumulator<T>(keys: (keyof T)[]) {
+  return ((state: T, update: Partial<T>) => {
+    const customKeys = keys.filter((i) => update[i] != null);
+    const hasCustomAccumulators = customKeys.length > 0;
     
-  constructor(
+    if (hasCustomAccumulators) {
+      const keysSet = new Set(customKeys);
+      const patchedUpdate = Object.keys(update).reduce((result, key) => {
+        const updateKey = key as keyof T;
+        
+        if (keysSet.has(updateKey)) {
+          const currentValue = state[updateKey];
+          const patch = update[updateKey];
+          return { ...result, [updateKey]: { ...currentValue, ...patch } };
+        }
+        
+        return { ...result, [updateKey]: update[updateKey] };
+      }, {} as Partial<T>);
+      
+      return { ...state, ...patchedUpdate };
+    }
+    
+    return { ...state, ...update };
+  }) as AccumulationFn;
+}
+```
+
+
+use the accumulator in `movie-list.component.ts`
+
+```ts
+// movie-list-page.component.ts
+
+ constructor(
     private route: ActivatedRoute,
     private movieData: MovieDataService
   ) {
     super();
+    this.setAccumulator(createDeepMergeAccumulator(['updating']));
+    this.set({
+      loading: true,
+      updating: {},
+      error: null,
+      movies: []
+    });
   }
-}
-```
-
-Start with implementing `loading` state
-
-```ts
-// movie-list-page.component.ts
-
-private movieListState$ = this.routerParams$.pipe(
-  switchMap(({ identifier, type }) => {
-    let data$ = this.movieData.getMovieGenre(identifier);
-    if (type === 'category') {
-      data$ = this.movieData.getMovieCategory(identifier);
-    }
-    return data$.pipe(
-      map(response => ({ movies: response.results })),
-      startWith({ loading: true }),
-      endWith({ loading: false })
-    );
-  })
-);
-
-ngOnInit() {
-  this.connect(this.movieListState$);
-}
-```
-
-Introduce the `viewModel$` to the template and show the `loader` based on the loading state value: 
-
-```angular2html
-<!-- movie-list-page.component.html -->
-
-<div class="padding-wrapper" *ngIf="viewModel$ | async as vm">
-  <app-loader *ngIf="vm.loading; else: movieList"></app-loader>
-  <ng-template #movieList>
-    <app-movie-list [movies]="vm.movies"></app-movie-list>
-  </ng-template>
-</div>
-```
-
-Confirm that the loader is shown when you navigate between movie-lists. Consider
-using chrome-devtools `network throttling` for debugging purposes.
-
-![img.png](docs/dev-tools-network.png)
-
-Let's implement the refresh functionality.
-
-We start by adding the trigger to refresh to our component
-
-```ts
-// movie-list-page.component.ts
-
-// trigger for refreshing movies
-private loadMovies$ = new Subject<void>();
-
-// a function to be invoked by the UI
-loadMovies() {
-  this.loadMovies$.next();
-}
-```
-
-With the trigger in place, we can already implement the state transition.
-When the trigger emits a new value, we want to again call `this.movieData.getXy`.
-
-```ts
-// movie-list-page.component.ts
-
-private movieListState$ = this.routerParams$.pipe(
-  switchMap(({ identifier, type }) => {
-    let data$ = this.movieData.getMovieGenre(identifier);
-    if (type === 'category') {
-      data$ = this.movieData.getMovieCategory(identifier);
-    }
-    // subscribe to loadMoviesTrigger
-    return this.loadMovies$.pipe(
-      // start with an empty value to instantly fetch the data  
-      startWith(null),
-      // ignore subsequent calls to re-fresh trigger until a value arrives
-      exhaustMap(() => {
-        return data$.pipe(
-          map(response => ({ movies: response.results })),
-          startWith({ loading: true }),
-          endWith({ loading: false })
-        );
-      })
-    );
-  })
-);
-```
-
-Implement the UI for the refreshTrigger in the component template.
-
-```angular2html
-<!-- movie-list-page.component.html -->
-
-<div class="padding-wrapper" *ngIf="viewModel$ | async as vm">
-  <!-- call the triggerfunction -->
-  <button (click)="loadMovies()">refresh list</button>
   
-  <app-loader *ngIf="vm.loading; else: movieList"></app-loader>
-  <ng-template #movieList>
-    <app-movie-list [movies]="vm.movies"></app-movie-list>
-  </ng-template>
-</div>
-```
-
-Run the application, test if the refresh flow works. Consider using the devtools again to throttle
-the network speed.
-
-For the sake of completeness, we also want to take care of the `error` state.
-
-```ts
-private movieListState$ = this.routerParams$.pipe(
-  switchMap(() => {
-    // ...
-    return this.loadMovies$.pipe(
-      startWith(null),
-      exhaustMap(() => {
-        return data$.pipe(
-          map(response => ({ movies: response.results })),
-          // catch the error and return it as state slice
-          // reset the movies slice to an empty array
-          catchError(e => of({ error: e, movies: [] })),
-          // reset the error to null start
-          startWith({ loading: true, error: null }),
-          endWith({ loading: false })
+ngOnInit() {
+  this.connect(
+    this.updateMovieRating$.pipe(
+      mergeMap(({ movie, rating }) => {
+        return this.movieData.updateMovieRating(movie.id, rating).pipe(
+          startWith({ updating: { [movie.id]: true  }}),
+          endWith({ updating: { [movie.id]: false  }})
         );
       })
-    );
-  })
-);
-```
-
-Now that we have the error state, let's implement a `side-effect`
-which displays an alert to the user after an error occurred.
-
-```ts
-// movie-list-page.component.ts
-
-ngOnInit() {
-  // ...
-  this.hold(
-    // trigger for the side-effect is the error state
-    this.select('error'),
-    error => {
-      // if we encounter an error, we display a message to the user
-      if (error) {
-        alert(error.message);
-      }
-    }
-  )
-}
-```
-
-**Bonus: re-usable fetch snippet**
-
-Create a re-usable function for the managing error, loading and data streams and
-use it in `movie-list-page.component.ts`.
-
-Example:
-
-```ts
-
-function exhaustFetch<T extends FetchState>(
-  trigger$: Observable<void>,
-  data$: Observable<Partial<T>>
-): Observable<Partial<T>> {
-  return trigger$.pipe(
-    startWith(null),
-    exhaustMap(() => {
-      return data$.pipe(
-        catchError(e => of({ error: e} as Partial<T>)),
-        startWith({ loading: true, error: null } as Partial<T>),
-        endWith({ loading: false } as Partial<T>)
-      );
-    })
-  )
-}
-
-// usage:
-
-private movieListState$ = this.routerParams$.pipe(
-  switchMap(({ identifier, type }) => {
-    let data$ = this.movieData.getMovieGenre(identifier);
-    if (type === 'category') {
-      data$ = this.movieData.getMovieCategory(identifier);
-    }
-    return exhaustFetch<MovieListState>(
-      this.loadMovies$,
-      data$.pipe(map(response => ({
-        movies: response.results
-      })))
     )
-  })
-);
+  );  
+}
 ```

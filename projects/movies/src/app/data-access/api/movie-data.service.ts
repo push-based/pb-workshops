@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, timer } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   MovieGenreModel,
@@ -65,7 +65,12 @@ export class MovieDataService {
   ): Observable<{ results: MovieModel[] }> =>
     this.http.get<{ results: MovieModel[] }>(this.URL_MOVIE_GENRE, {
       params: { with_genres: genreId, page, sort_by: sortBy },
-    })
+    });
+
+  updateMovieRating = (
+    movieId: number,
+    rating: number
+  ): Observable<any> => timer(2500);
 
   getPersonMovies = (page: string, sortBy: string): Observable<MovieModel> =>
     this.http.get<MovieModel>(this.URL_GENRE_MOVIE_LIST, {
