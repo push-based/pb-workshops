@@ -4,8 +4,9 @@
 
 ### 01 simple local state
 
-* go to `src/app/app-shell/app-shell.component.ts`
-* create local `state$` and `viewModel$` variables
+go to `src/app/app-shell/app-shell.component.ts`
+
+create local `state$` and `viewModel$` variables
 
 ```ts
 // app-shell.component.ts
@@ -21,7 +22,7 @@ private state$ = new BehaviorSubject<{
 viewModel$ = this.state$;
 ```
 
-* "connect" variables to local state
+"connect" variables to local state
 
 ```ts
 // app-shell.component.ts
@@ -50,7 +51,7 @@ ngOnInit() {
 }
 ```
 
-* use `viewModel$` in the view
+use `viewModel$` in the view
 
 ```html
 <!-- app-shell.component.html -->
@@ -63,10 +64,36 @@ ngOnInit() {
 </app-side-drawer>
 ```
 
-* replace occurrences of `(activeRoute$ | async)` with `vm.activeRoute`
+replace occurrences of `(activeRoute$ | async)` with `vm.activeRoute`
 
-**Optional**
+**Bonus**
 
 introduce `sideDrawerOpen: boolean` to the state
 
+**Bonus+**:
+
+improve the `setState` api. Whenever we want to set a new value to our state, we need
+to provide the current value + the old value in order to not lose it.
+Let's simplify this process by introducing a generic `setState<K>` method.
+
+```ts
+setState<K extends keyof AppShellState>(prop: K, value: AppShellState[K]) {
+  this.state$.next({
+    ...this.state$.getValue(),
+    [prop]: value
+  })
+}
+```
+
+we use it like:
+
+```ts
+this.genres$
+  .subscribe(genres => {
+    this.setState('genres', genres);
+  });
+this.activeRoute$.subscribe(activeRoute => {
+  this.setState('activeRoute', activeRoute);
+});
+```
 
