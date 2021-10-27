@@ -160,10 +160,28 @@ genres$ =  this.movieService.getGenres()
 
 ### app.component
 
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* run again
+add `app-dirty-check` to template
+
+```html
+<!-- app.component.html -->
+<app-dirty-check></app-dirty-check>
+```
+
+run
+
+```shell
+yarn run start
+```
+
+turn on CD
+
+```ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
 
 ## trackBy (Part 2)
 
