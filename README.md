@@ -11,10 +11,12 @@ create local `state$` and `viewModel$` variables
 ```ts
 // app-shell.component.ts
 
-private state$ = new BehaviorSubject<{
+interface AppShellState {
   activeRoute: string;
   genres: MovieGenreModel[]
-}>({
+}
+
+private state$ = new BehaviorSubject<AppShellState>({
   activeRoute: '',
   genres: []
 });
@@ -38,13 +40,17 @@ ngOnInit() {
   this.genres$
     .subscribe(genres => {
       this.state$.next({
-        genres,
-        activeRoute: this.state$.getValue().activeRoute
+         // don't lose the old values
+        ...this.state$.getValue(),
+        // set the new value
+        genres
       })
     });
   this.activeRoute$.subscribe(activeRoute => {
     this.state$.next({
-      genres: this.state$.getValue().genres,
+      // don't lose the old values
+      ...this.state$.getValue(),
+      // set the new value
       activeRoute: activeRoute
     })
   });
