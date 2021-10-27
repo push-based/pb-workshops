@@ -5,6 +5,11 @@ import { MovieDataService } from '../data-access/api/movie-data.service';
 import { MovieGenreModel } from '../shared/model/index';
 import { trackByProp } from '../shared/utils/track-by';
 
+interface AppShellState {
+  activeRoute: string;
+  genres: MovieGenreModel[]
+}
+
 @Component({
   selector: 'app-shell',
   templateUrl: './app-shell.component.html',
@@ -42,16 +47,10 @@ export class AppShellComponent implements OnInit {
   ngOnInit() {
     this.genres$
       .subscribe(genres => {
-        this.state$.next({
-          genres,
-          activeRoute: this.state$.getValue().activeRoute
-        })
+        this.setState('genres', genres);
       });
     this.activeRoute$.subscribe(activeRoute => {
-      this.state$.next({
-        genres: this.state$.getValue().genres,
-        activeRoute: activeRoute
-      })
+      this.setState('activeRoute', activeRoute);
     });
   }
 
@@ -62,6 +61,13 @@ export class AppShellComponent implements OnInit {
 
   closeSidenav() {
     this.sideDrawerOpen = false;
+  }
+
+  setState<K extends keyof AppShellState>(prop: K, value: AppShellState[K]) {
+    this.state$.next({
+      ...this.state$.getValue(),
+      [prop]: value
+    })
   }
 
 }
