@@ -29,39 +29,143 @@ export class DirtyCheckComponentModule {}
 
 ## CD OnPush
 
-**movie-list.component**
+### movie-list.component
 
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* data still shown, checked() count is 1
+add `app-dirty-check` to template
 
-**movie-list-page.component**
+```html
+<!-- movie-list.component.html -->
+<app-dirty-check></app-dirty-check>
+```
 
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* movies missing, how to fix?
-  * `cdRef#markForCheck`
-  * `movies$` => async pipe
+run
+
+```shell
+yarn run start
+```
+
+turn on CD
+
+```ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
+data still shown, checked() count is 1
+
+### movie-list-page.component
+
+add `app-dirty-check` to template
+
+```html
+<!-- movie-list-page.component.html -->
+<app-dirty-check></app-dirty-check>
+```
+
+run
+
+```shell
+yarn run start
+```
+
+turn on CD
+
+```ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
+
+movies missing, how to fix?
+
+`cdRef#markForCheck`
+
+```ts
+// movie-list-page.component.ts
+
+this.routerParams$.pipe(/* service calls */).subscribe(() => {
+    // 
+    this.cdRef.markForCheck();
+})
+```
+
+`movies$` => async pipe
+
+```ts
+// movie-list-page.component.ts
+
+movies$ = this.routerParams$.pipe(/* service calls */)
+```
+
+```html
+<app-movie-list [movies]="movies$ | async"></app-movie-list>
+
+```
   
-**app-shell.component**
+### app-shell.component
 
-* add `app-dirty-check` to template
-* run
-* turn on CD
-* genres missing, how to fix?
-  * `cdRef#markForCheck`
-  * `genres$` => async pipe
+add `app-dirty-check` to template
 
-**app.component**
+```html
+<!-- app-shell.component.html -->
+<app-dirty-check></app-dirty-check>
+```
+
+run
+
+```shell
+yarn run start
+```
+
+turn on CD
+
+```ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
+
+
+genres missing, how to fix?
+
+`cdRef#markForCheck`
+
+```ts
+// app-shell.component.ts
+
+this.movieService.getGenres().subscribe(() => {
+    // 
+    this.cdRef.markForCheck();
+})
+```
+
+`genres$` => async pipe
+
+```ts
+// app-shell.component.ts
+
+genres$ =  this.movieService.getGenres()
+```
+
+```html
+<div *ngFor="let genre of genres$ | async"></div>
+
+```
+
+### app.component
 
 * add `app-dirty-check` to template
 * run
 * turn on CD
 * run again
 
-## trackBy
+## trackBy (Part 2)
 
 **(optional) trackByProp util**
 
@@ -78,7 +182,6 @@ export const trackByProp: <T>(prop: keyof T) => TrackByFunction<T> =
 **movie-list.component.ts**
 
 * add `app-dirty-check` to movie-item template
-* run
 * add trackBy to `*ngFor="let movie of movies;"`
 * run again
 
