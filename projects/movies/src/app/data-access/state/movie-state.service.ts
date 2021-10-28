@@ -14,6 +14,7 @@ import { MovieModel } from '../../shared/model/movie.model';
 import { createDeepMergeAccumulator } from '../../shared/utils/deep-merge-accumulator';
 import { exhaustFetch } from '../../shared/utils/exhaust-fetch';
 import { MovieDataService } from '../api/movie-data.service';
+import { AbstractMovieState } from './abstract-movie-state.service';
 
 interface MovieGenrePayload {
   genreId: string;
@@ -51,7 +52,7 @@ export interface MovieState {
 
 
 @Injectable({ providedIn: 'root' })
-export class MovieStateService extends RxState<MovieState> {
+export class MovieStateService extends RxState<MovieState> implements AbstractMovieState {
 
   /** selectors **/
 

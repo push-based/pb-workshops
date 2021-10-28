@@ -8,7 +8,7 @@ import {
   Observable,
   Subject,
 } from 'rxjs';
-import { MovieStateService } from '../../data-access/state/movie-state.service';
+import { AbstractMovieState } from '../../data-access/state/abstract-movie-state.service';
 import { MovieModel } from '../../shared/model/index';
 
 
@@ -49,7 +49,7 @@ export class MovieListPageComponent
 
   constructor(
     private route: ActivatedRoute,
-    private movieState: MovieStateService
+    private movieState: AbstractMovieState
   ) {
     super();
     this.set({

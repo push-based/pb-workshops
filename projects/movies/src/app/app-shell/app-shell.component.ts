@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { RxState } from '@rx-angular/state';
 import { filter, map, Subject } from 'rxjs';
-import { MovieStateService } from '../data-access/state/movie-state.service';
+import { AbstractMovieState } from '../data-access/state/abstract-movie-state.service';
 import { MovieGenreModel } from '../shared/model/index';
 import { trackByProp } from '../shared/utils/track-by';
 
@@ -29,7 +29,7 @@ export class AppShellComponent extends RxState<{
 
   constructor(
     private router: Router,
-    private movieState: MovieStateService
+    private movieState: AbstractMovieState
   ) {
     super();
   }

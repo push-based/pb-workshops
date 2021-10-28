@@ -6,6 +6,7 @@ import { ROUTING_IMPORTS } from './app.routing';
 import { AppComponent } from './app.component';
 import { AppShellModule } from './app-shell/app-shell.module';
 import { httpInterceptorProviders } from './data-access/interceptors/http-interceptor.providers';
+import { AbstractMovieState } from './data-access/state/abstract-movie-state.service';
 import { MovieStateService } from './data-access/state/movie-state.service';
 import { SpecialMovieStateService } from './data-access/state/special-movie-state.service';
 import { MovieDetailPageModule } from './pages/movie-detail-page/movie-detail-page.module';
@@ -24,8 +25,8 @@ import { MovieListPageModule } from './pages/movie-list-page/movie-list-page.mod
   providers: [
     httpInterceptorProviders,
     {
-      provide: MovieStateService,
-      useExisting: SpecialMovieStateService
+      provide: AbstractMovieState,
+      useExisting: MovieStateService
     }
   ],
   bootstrap: [AppComponent]

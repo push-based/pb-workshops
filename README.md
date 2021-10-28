@@ -1,6 +1,6 @@
 # Dependency Injection
 
-## Simple Override
+## Abstract Movie State
 
 We want to ship a new version of `MovieStateService` and introduce
 it to the codebase with minimal changes as possible.
