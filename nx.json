@@ -1,0 +1,19 @@
+{
+  "npmScope": "movies",
+  "affected": {
+    "defaultBase": "origin/master"
+  },
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": "*",
+    "tslint.json": "*",
+    ".eslintrc.json": "*",
+    "nx.json": "*",
+    "tsconfig.base.json": "*"
+  },
+  "cli": {
+    "packageManager": "yarn",
+    "defaultCollection": "@nrwl/angular"
+  },
+  "defaultProject": "movies"
+}
