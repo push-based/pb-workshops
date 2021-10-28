@@ -15,6 +15,12 @@ export abstract class AbstractMovieState {
 
   abstract loadMovieCategory(category: string): void;
 
+  abstract loadMovieGenre(
+    genreId: string,
+    page?: string,
+    sortBy?: string
+  ): void;
+
   abstract updateMovieRating(payload: {
     movie: MovieModel;
     rating: number;
