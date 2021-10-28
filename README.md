@@ -2,43 +2,62 @@
 
 ## Abstract Movie State
 
-We want to ship a new version of `MovieStateService` and introduce
-it to the codebase with minimal changes as possible.
+We want to setup our global state resilient against changes and provide consumers with
+just an interface of our state.
 
-Let's first implement our new service.
+Let's first implement the abstract service.
 
-create a file: `src/app/data-access/state/special-movie-state.service.ts`
+create a file: `src/app/data-access/state/abstract-movie-state.service.ts`
 
 ```ts
-// special-movie-state.service.ts
+// abstract-movie-state.service.ts
 
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { MovieStateService } from './movie-state.service';
 
-@Injectable({ providedIn: 'root' })
-export class SpecialMovieStateService extends MovieStateService {
+@Injectable()
+export abstract class AbstractMovieState {
     
 }
 ```
 
-Our new implementation returns `special` genres.
+Now add the needed functions
 
 ```ts
-// special-movie-state.service.ts
+// abstract-movie-state.service.ts
 
-genres$ = this.select('genres').pipe(
-    map(genres => genres.map(g => ({
-      ...g,
-      name: `special ${g.name}`
-    })))
-  )
+abstract genres$: Observable<MovieGenreModel[]>;
+abstract  movieList$: Observable<{
+  movies: MovieModel[];
+  error: any;
+  loading: boolean;
+  updating: Record<string, boolean>;
+}>;
+
+abstract loadMovieCategory(
+  category: string
+): void;
+
+abstract updateMovieRating(
+  payload: { movie: MovieModel, rating: number }
+): void;
 
 ```
 
+Let the `MovieStateService` implement our abstract interface.
+
+```ts
+// movie-state.service.ts
+
+export class MovieStateService
+  extends RxState<MovieState> implements AbstractMovieState {
+  
+}
+```
 
 After the service implementation is finished, we want to provide
-the new special instance of our `MovieStateService` to the consumers.
+the `MovieStateService` as our `AbstractMovieState` interface to the consumers.
 
 go to `src/app/app.module.ts`
 
@@ -53,8 +72,8 @@ go to `src/app/app.module.ts`
   providers: [
     // ...,
     {
-      provide: MovieStateService,
-      useExisting: SpecialMovieStateService
+      provide: AbstractMovieState,
+      useExisting: MovieStateService
     }
   ],
   bootstrap: [AppComponent]
@@ -62,5 +81,22 @@ go to `src/app/app.module.ts`
 
 ```
 
-Now run the application and see if the new genres appear in the view.
+Finally, we need to adapt the usage from `MovieStateService` to `AbstractMovieState`
+in our components.
+
+```ts
+// app-shell.component.ts
+
+constructor(
+  private router: Router,
+  private movieState: AbstractMovieState
+) {
+  super();
+}
+
+```
+
+Do that for all missing components.
+
+Nice job, we have migrated to a resilient interface based clean architecture!
 
