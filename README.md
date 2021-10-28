@@ -2,6 +2,8 @@
 
 ## Local State
 
+![docs/local-state-04.png](docs/local-state-04.png)
+
 ### 04 manage list state with per-item update
 
 go to `src/app/ui/atoms/star-rating/star-rating.component.ts`
