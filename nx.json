@@ -1,7 +1,7 @@
 {
   "npmScope": "movies",
   "affected": {
-    "defaultBase": "origin/master"
+    "defaultBase": "HEAD~1"
   },
   "implicitDependencies": {
     "angular.json": "*",
