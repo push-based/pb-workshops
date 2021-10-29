@@ -1,5 +1,5 @@
 import { Directive, ElementRef } from '@angular/core';
-import { supportsImageLoading } from '../../shared/utils/supports-image-loading';
+import { supportsImageLoading } from '@movies/shared/util';
 
 declare const ngDevMode: boolean;
 

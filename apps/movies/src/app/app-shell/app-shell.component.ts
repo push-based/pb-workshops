@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { RxState } from '@rx-angular/state';
 import { filter, map, Subject } from 'rxjs';
-import { AbstractMovieState } from '../data-access/state/abstract-movie-state.service';
-import { MovieGenreModel } from '../shared/model/index';
-import { trackByProp } from '../shared/utils/track-by';
+import { AbstractMovieState } from '@movies/shared/data-access';
+import { MovieGenreModel } from '@movies/shared/models';
+import { trackByProp } from '@movies/shared/util';
 
 @Component({
   selector: 'app-shell',

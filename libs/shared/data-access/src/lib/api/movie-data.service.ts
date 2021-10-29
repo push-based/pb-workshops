@@ -6,8 +6,8 @@ import {
   MovieGenreModel,
   MovieModel,
   MoviePersonModel,
-} from '../../shared/model/index';
-import { MovieDatabaseModel } from '../../shared/model/movie-database.model';
+} from '@movies/shared/models';
+import { MovieDatabaseModel } from '@movies/shared/models';
 
 @Injectable({
   providedIn: 'root',

@@ -6,9 +6,9 @@ import {
   Output,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { MovieModel } from '../../../shared/model/index';
-import { W300H450 } from '../../../shared/utils/image-sizes';
-import { trackByProp } from '../../../shared/utils/track-by';
+import { MovieModel } from '@movies/shared/models';
+import { W300H450 } from '@movies/shared/util';
+import { trackByProp } from '@movies/shared/util';
 
 interface Movie extends MovieModel {
   url: string;

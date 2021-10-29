@@ -10,10 +10,10 @@ import {
   MovieDetailsModel,
   MovieGenreModel,
   MovieModel,
-} from '../../shared/model/index';
-import { MovieDataService } from '../../data-access/api/movie-data.service';
+} from '@movies/shared/models';
+import { MovieDataService } from '@movies/shared/data-access';
 import { ActivatedRoute, Router } from '@angular/router';
-import { W780H1170 } from '../../shared/utils/image-sizes';
+import { W780H1170 } from '@movies/shared/util';
 
 type MovieDetail = MovieDetailsModel & { languages_runtime_release: string };
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MovieGenreModel } from '../../shared/model/movie-genre.model';
-import { MovieModel } from '../../shared/model/movie.model';
+import { MovieGenreModel } from '@movies/shared/models';
+import { MovieModel } from '@movies/shared/models';
 
 @Injectable()
 export abstract class AbstractMovieState {

@@ -16,7 +16,11 @@
     "target": "es2017",
     "module": "es2020",
     "lib": ["es2018", "dom"],
-    "paths": {},
+    "paths": {
+      "@movies/shared/data-access": ["libs/shared/data-access/src/index.ts"],
+      "@movies/shared/models": ["libs/shared/models/src/index.ts"],
+      "@movies/shared/util": ["libs/shared/util/src/index.ts"]
+    },
     "rootDir": "."
   },
   "angularCompilerOptions": {

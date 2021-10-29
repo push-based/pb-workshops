@@ -2,6 +2,9 @@
   "version": 2,
   "projects": {
     "movies": "apps/movies",
-    "movies-e2e": "apps/movies-e2e"
+    "movies-e2e": "apps/movies-e2e",
+    "shared-data-access": "libs/shared/data-access",
+    "shared-models": "libs/shared/models",
+    "shared-util": "libs/shared/util"
   }
 }

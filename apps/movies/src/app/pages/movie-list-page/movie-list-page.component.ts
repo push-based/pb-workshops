@@ -3,8 +3,8 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { RxState } from '@rx-angular/state';
 import { combineLatest, map, Observable, Subject } from 'rxjs';
-import { AbstractMovieState } from '../../data-access/state/abstract-movie-state.service';
-import { MovieModel } from '../../shared/model/index';
+import { AbstractMovieState } from '@movies/shared/data-access';
+import { MovieModel } from '@movies/shared/models';
 
 type RouterParams = {
   type: 'category' | 'genre';

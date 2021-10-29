@@ -12,10 +12,10 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import { MovieGenreModel } from '../../shared/model/movie-genre.model';
-import { MovieModel } from '../../shared/model/movie.model';
-import { createDeepMergeAccumulator } from '../../shared/utils/deep-merge-accumulator';
-import { exhaustFetch } from '../../shared/utils/exhaust-fetch';
+import { MovieGenreModel } from '@movies/shared/models';
+import { MovieModel } from '@movies/shared/models';
+import { createDeepMergeAccumulator } from '@movies/shared/util';
+import { exhaustFetch } from '@movies/shared/util';
 import { MovieDataService } from '../api/movie-data.service';
 import { AbstractMovieState } from './abstract-movie-state.service';
 

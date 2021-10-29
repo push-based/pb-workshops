@@ -10,3 +10,4 @@ export { MovieVideosModel } from './movie-videos.model';
 export { TvCastModel } from './tv-cast.model';
 export { TvCreditsModel } from './tv-credits.model';
 export { TvCrewModel } from './tv-crew.model';
+export { MovieDatabaseModel } from './movie-database.model';
