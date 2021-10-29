@@ -1,102 +1,43 @@
-# Dependency Injection
+# NX Intro
 
-## Abstract Movie State
+## Create Libs
 
-We want to setup our global state resilient against changes and provide consumers with
-just an interface of our state.
+### Models
 
-Let's first implement the abstract service.
+create models lib:
 
-create a file: `src/app/data-access/state/abstract-movie-state.service.ts`
-
-```ts
-// abstract-movie-state.service.ts
-
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
-import { MovieStateService } from './movie-state.service';
-
-@Injectable()
-export abstract class AbstractMovieState {
-    
-}
+```shell
+yarn nx g @nrwl/workspace:lib models --directory=shared
 ```
 
-Now add the needed functions
+find & replace:
 
-```ts
-// abstract-movie-state.service.ts
+from: `from.*model.*` to: `from '@movies/shared/model';`
 
-abstract genres$: Observable<MovieGenreModel[]>;
-abstract  movieList$: Observable<{
-  movies: MovieModel[];
-  error: any;
-  loading: boolean;
-  updating: Record<string, boolean>;
-}>;
+fix `libs/shared/models/index.ts`:
 
-abstract loadMovieCategory(
-  category: string
-): void;
+### Util
 
-abstract updateMovieRating(
-  payload: { movie: MovieModel, rating: number }
-): void;
+create util lib:
 
+```shell
+yarn nx g @nrwl/angular:lib util --directory=shared
 ```
 
-Let the `MovieStateService` implement our abstract interface.
+from: `from.*utils.*` to: `from '@movies/shared/util'`
 
-```ts
-// movie-state.service.ts
+fix `libs/shared/util/index.ts`:
 
-export class MovieStateService
-  extends RxState<MovieState> implements AbstractMovieState {
-  
-}
+### data-access 
+
+create data-access lib:
+
+```shell
+yarn nx g @nrwl/angular:lib data-access --directory=shared
 ```
 
-After the service implementation is finished, we want to provide
-the `MovieStateService` as our `AbstractMovieState` interface to the consumers.
+find & replace:
 
-go to `src/app/app.module.ts`
+from: `from.*data-access.*` to: `from '@movies/shared/data-access';`
 
-```ts
-// app.module.ts
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-      //
-  ],
-  providers: [
-    // ...,
-    {
-      provide: AbstractMovieState,
-      useExisting: MovieStateService
-    }
-  ],
-  bootstrap: [AppComponent]
-})
-
-```
-
-Finally, we need to adapt the usage from `MovieStateService` to `AbstractMovieState`
-in our components.
-
-```ts
-// app-shell.component.ts
-
-constructor(
-  private router: Router,
-  private movieState: AbstractMovieState
-) {
-  super();
-}
-
-```
-
-Do that for all missing components.
-
-Nice job, we have migrated to a resilient interface based clean architecture!
-
+fix `libs/shared/data-access/index.ts`:
