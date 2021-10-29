@@ -1,5 +1,11 @@
 # NX Intro
 
+## Prepare
+
+```shell
+yarn install
+```
+
 ## Create Libs
 
 ### Models

@@ -7,7 +7,7 @@ import {
 import { Observable } from 'rxjs';
 
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '@movies/env';
 
 @Injectable({
   providedIn: 'root',
