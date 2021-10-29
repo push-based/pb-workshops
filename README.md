@@ -47,3 +47,21 @@ find & replace:
 from: `from.*data-access.*` to: `from '@movies/shared/data-access';`
 
 fix `libs/shared/data-access/index.ts`:
+
+## checkout solution
+
+```shell
+git checkout 06-01-nx-setup-solution
+```
+
+do a change in `models`
+
+```shell
+yarn nx affected:lint
+```
+
+## dependency graph
+
+```shell
+yarn dep-graph
+```
