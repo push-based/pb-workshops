@@ -4,6 +4,7 @@ export * from './backdrop/backdrop.component';
 export * from './dark-mode-toggle/dark-mode-toggle.component';
 export * from './dark-mode-toggle/dark-mode-toggle.module';
 export * from './dirty-check/dirty-check.component';
+export * from './loader/loader.component';
 export * from './form-control/form-control.component';
 export * from './hamburger-button/hamburger-button.component';
 export * from './icons/search/search-icon.component';

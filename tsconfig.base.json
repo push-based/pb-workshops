@@ -18,8 +18,21 @@
     "lib": ["es2018", "dom"],
     "paths": {
       "@movies/env": ["environments/index.ts"],
+      "@movies/movies/feature-app-shell": [
+        "libs/movies/feature-app-shell/src/index.ts"
+      ],
+      "@movies/movies/feature-movie-detail": [
+        "libs/movies/feature-movie-detail/src/index.ts"
+      ],
+      "@movies/movies/feature-movie-list": [
+        "libs/movies/feature-movie-list/src/index.ts"
+      ],
+      "@movies/movies/ui-movie-list": [
+        "libs/movies/ui-movie-list/src/index.ts"
+      ],
       "@movies/shared/data-access": ["libs/shared/data-access/src/index.ts"],
       "@movies/shared/models": ["libs/shared/models/src/index.ts"],
+      "@movies/shared/ui": ["libs/shared/ui/src/index.ts"],
       "@movies/shared/util": ["libs/shared/util/src/index.ts"]
     },
     "rootDir": "."

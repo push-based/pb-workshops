@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/movies/feature-app-shell",
+  "sourceRoot": "libs/movies/feature-app-shell/src",
+  "prefix": "movies",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/movies/feature-app-shell"],
+      "options": {
+        "jestConfig": "libs/movies/feature-app-shell/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/movies/feature-app-shell/src/**/*.ts",
+          "libs/movies/feature-app-shell/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

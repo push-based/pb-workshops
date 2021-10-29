@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/movies/feature-movie-list",
+  "sourceRoot": "libs/movies/feature-movie-list/src",
+  "prefix": "movies",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/movies/feature-movie-list"],
+      "options": {
+        "jestConfig": "libs/movies/feature-movie-list/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/movies/feature-movie-list/src/**/*.ts",
+          "libs/movies/feature-movie-list/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

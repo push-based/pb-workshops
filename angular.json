@@ -3,8 +3,13 @@
   "projects": {
     "movies": "apps/movies",
     "movies-e2e": "apps/movies-e2e",
+    "movies-feature-app-shell": "libs/movies/feature-app-shell",
+    "movies-feature-movie-detail": "libs/movies/feature-movie-detail",
+    "movies-feature-movie-list": "libs/movies/feature-movie-list",
+    "movies-ui-movie-list": "libs/movies/ui-movie-list",
     "shared-data-access": "libs/shared/data-access",
     "shared-models": "libs/shared/models",
+    "shared-ui": "libs/shared/ui",
     "shared-util": "libs/shared/util"
   }
 }

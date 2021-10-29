@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/movies/ui-movie-list",
+  "sourceRoot": "libs/movies/ui-movie-list/src",
+  "prefix": "movies",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/movies/ui-movie-list"],
+      "options": {
+        "jestConfig": "libs/movies/ui-movie-list/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/movies/ui-movie-list/src/**/*.ts",
+          "libs/movies/ui-movie-list/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
