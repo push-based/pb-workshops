@@ -1,7 +1,7 @@
 {
   "npmScope": "movies",
   "affected": {
-    "defaultBase": "main"
+    "defaultBase": "workshop-setup"
   },
   "implicitDependencies": {
     "angular.json": "*",
